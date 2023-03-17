@@ -36,7 +36,6 @@ public class A3main {
 		switch (args[0]) {
 		case "P1":
 			game = new Game(p);
-			System.out.println("Final map");
 //			game.getBoard().printBoard();
 			agent = new Agent(args[0], game);
 			agent.playGame();

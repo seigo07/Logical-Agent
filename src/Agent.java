@@ -105,7 +105,9 @@ public class Agent {
             }
         }
 //        System.out.println("Agent board view at t0");
-//        board.printBoard();
+        if (A3main.getVerbose()) {
+            board.printBoard();
+        }
     }
 
     /**
@@ -649,11 +651,13 @@ public class Agent {
             switch (type) {
                 case "P1":
                     clearNeighbours();
-                    System.out.println();
+//                    System.out.println();
                     if (!game.isGameWon()) {
                         //System.out.println("Making random move");
+                        if (A3main.getVerbose()) {
+                            board.printBoard();
+                        }
                         makeMove();
-//                        board.printBoard();
                     }
                     break;
                 case "P2":
@@ -679,12 +683,12 @@ public class Agent {
             }
         }
         // depending on whether the game has been won or not, it will return the appropriate string
+        System.out.println("Final map");
+        board.printBoard();
         if (game.isGameWon()) {
-            board.printBoard();
             System.out.println("Result: Agent alive: all solved");
 //            System.out.println();
         } else {
-            board.printBoard();
             System.out.println("Result: Agent dead: found mine");
 //            System.out.println();
         }
