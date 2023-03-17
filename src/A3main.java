@@ -8,10 +8,14 @@ public class A3main {
 	private static Agent agent;
 	// instance of Game, holding the actual world view as well as the state of the game e.g game is over, game is won
 	private static Game game;
+	private static boolean verbose;
+	public static boolean getVerbose() {
+		return verbose;
+	}
 
 	public static void main(String[] args) {
 		
-		boolean verbose=false; //prints the formulas for SAT if true
+		verbose=false; //prints the formulas for SAT if true
 		if (args.length>2 && args[2].equals("verbose") ){
 			verbose=true; //prints the formulas for SAT if true
 		}
@@ -33,7 +37,7 @@ public class A3main {
 		case "P1":
 			game = new Game(p);
 			System.out.println("Final map");
-			game.getBoard().printBoard();
+//			game.getBoard().printBoard();
 			agent = new Agent(args[0], game);
 			agent.playGame();
 		case "P2":

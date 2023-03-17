@@ -42,6 +42,9 @@ public class Cell {
      */
     public void setHint(char hint) {
         this.hint = hint;
+        if (hint == 't') {
+            this.hint = '-';
+        }
     }
 
 }

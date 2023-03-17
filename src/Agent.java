@@ -104,8 +104,8 @@ public class Agent {
                 board.board[j][i] = '?';
             }
         }
-        System.out.println("Agent board view at t0");
-        board.printBoard();
+//        System.out.println("Agent board view at t0");
+//        board.printBoard();
     }
 
     /**
@@ -125,14 +125,14 @@ public class Agent {
      * Method which probes the hint cells
      */
     public void probeHintCells() {
-        System.out.println("Probing hint cells");
-        System.out.println();
+//        System.out.println("Probing hint cells");
+//        System.out.println();
         Cell cell = findCell(0, 0);
         probeCell(cell);
-        cell = findCell(boardLength / 2, boardLength / 2);
-        probeCell(cell);
-        System.out.println("Agent board view at t1");
-        board.printBoard();
+//        cell = findCell(boardLength / 2, boardLength / 2);
+//        probeCell(cell);
+//        System.out.println("Agent board view at t1");
+//        board.printBoard();
     }
 
     /**
@@ -182,16 +182,16 @@ public class Agent {
         uncoveredCells.add(cell);
         board.board[cell.y][cell.x] = cell.getHint();
         if (cell.getHint() == 't') {
-            System.out.println("tornado " + cell.toString());
+//            System.out.println("tornado " + cell.toString());
         }
         // if the hint is 0, increment free neighbours. Tells program that there are free neighbours to be probed
         else if (cell.getHint() == '0') {
             cellsWithFreeNeighbours++;
-            System.out.println("probe " + cell.toString());
+//            System.out.println("probe " + cell.toString());
 
         }
         else {
-            System.out.println("probe " + cell.toString());
+//            System.out.println("probe " + cell.toString());
         }
         //System.out.println();
     }
@@ -334,7 +334,7 @@ public class Agent {
         // probe all the cells in the probe cell list. Done outside the loop to prevent ConcurrentModificationException
         for (Cell adjacentCell : adjacentCells) {
             if (!hasBeenExamined(adjacentCell)) {
-                System.out.println("Uncovering free neighbour");
+//                System.out.println("Uncovering free neighbour");
                 probeCell(adjacentCell);
             }
         }
@@ -362,6 +362,11 @@ public class Agent {
     public void makeRandomMove() {
         Random rand = new Random();
         Cell cell = unexaminedCells.get(rand.nextInt(unexaminedCells.size()));
+        probeCell(cell);
+    }
+
+    public void makeMove() {
+        Cell cell = unexaminedCells.get(0);
         probeCell(cell);
     }
 
@@ -639,7 +644,7 @@ public class Agent {
     /**
      * Method which plays the game. According to the agent type, it will use a method fitting that strategy
      */
-    public String playGame() {
+    public void playGame() {
         while (!game.isGameOver()) {
             switch (type) {
                 case "P1":
@@ -647,8 +652,8 @@ public class Agent {
                     System.out.println();
                     if (!game.isGameWon()) {
                         //System.out.println("Making random move");
-                        makeRandomMove();
-                        board.printBoard();
+                        makeMove();
+//                        board.printBoard();
                     }
                     break;
                 case "P2":
@@ -675,13 +680,13 @@ public class Agent {
         }
         // depending on whether the game has been won or not, it will return the appropriate string
         if (game.isGameWon()) {
-            System.out.println("game won");
-            System.out.println();
-            return "game won";
+            board.printBoard();
+            System.out.println("Result: Agent alive: all solved");
+//            System.out.println();
         } else {
-            System.out.println("game lost");
-            System.out.println();
-            return "game lost";
+            board.printBoard();
+            System.out.println("Result: Agent dead: found mine");
+//            System.out.println();
         }
     }
 
