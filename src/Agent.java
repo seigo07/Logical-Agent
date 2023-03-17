@@ -131,8 +131,10 @@ public class Agent {
 //        System.out.println();
         Cell cell = findCell(0, 0);
         probeCell(cell);
-//        cell = findCell(boardLength / 2, boardLength / 2);
-//        probeCell(cell);
+        if (!A3main.getAgentType().equals("P1")) {
+            cell = findCell(boardLength / 2, boardLength / 2);
+            probeCell(cell);
+        }
 //        System.out.println("Agent board view at t1");
 //        board.printBoard();
     }
@@ -210,8 +212,8 @@ public class Agent {
         examinedCells.add(cell);
         unexaminedCells.remove(cell);
         board.board[cell.y][cell.x] = cell.getHint();
-        System.out.println("mark " + cell.toString());
-        System.out.println();
+//        System.out.println("mark " + cell.toString());
+//        System.out.println();
     }
 
     /**
@@ -463,7 +465,7 @@ public class Agent {
         }
         // if no unexamined cell is in an AMN or AFN situation, make random move.
         if (action == "R") {
-            System.out.println("No SPX, going random.");
+//            System.out.println("No SPX, going random.");
             makeRandomMove();
         } else if (action == "P") {
             //System.out.println("AFN found, probing");
@@ -662,11 +664,11 @@ public class Agent {
                     break;
                 case "P2":
                     clearNeighbours();
-                    System.out.println();
+//                    System.out.println();
                     if (!game.isGameWon()) {
                         //System.out.println("Making SPX move");
                         makeSPXMove();
-                        board.printBoard();
+//                        board.printBoard();
                     }
                     break;
                 case "SATX":

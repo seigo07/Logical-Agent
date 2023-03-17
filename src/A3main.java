@@ -9,6 +9,10 @@ public class A3main {
 	// instance of Game, holding the actual world view as well as the state of the game e.g game is over, game is won
 	private static Game game;
 	private static boolean verbose;
+	private static String agentType;
+	public static String getAgentType() {
+		return agentType;
+	}
 	public static boolean getVerbose() {
 		return verbose;
 	}
@@ -33,21 +37,30 @@ public class A3main {
 		printBoard(p);
 		System.out.println("Start!");
 
-		switch (args[0]) {
+		agentType = args[0];
+
+		switch (agentType) {
 		case "P1":
 			game = new Game(p);
 //			game.getBoard().printBoard();
-			agent = new Agent(args[0], game);
+			agent = new Agent(agentType, game);
 			agent.playGame();
+			break;
 		case "P2":
-			//TODO: Part 2
+			game = new Game(p);
+//			game.getBoard().printBoard();
+			agent = new Agent(agentType, game);
+			agent.playGame();
+			break;
 		case "P3":
 			//TODO: Part 3
+			break;
 		case "P4":
 			//TODO: Part 4
+			break;
 		case "P5":
 			//TODO: Part 5
-
+			break;
 		}
 
 
