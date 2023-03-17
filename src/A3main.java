@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 public class A3main {
 
+	// instance of Agent i.e. either RPX, SPX, SATX
+	private static Agent agent;
+	// instance of Game, holding the actual world view as well as the state of the game e.g game is over, game is won
+	private static Game game;
+
 	public static void main(String[] args) {
 		
 		boolean verbose=false; //prints the formulas for SAT if true
@@ -26,7 +31,11 @@ public class A3main {
 
 		switch (args[0]) {
 		case "P1":
-			//TODO: Part 1
+			game = new Game(p);
+			System.out.println("Final map");
+			game.getBoard().printBoard();
+			agent = new Agent(args[0], game);
+			agent.playGame();
 		case "P2":
 			//TODO: Part 2
 		case "P3":
