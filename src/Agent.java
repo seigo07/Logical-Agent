@@ -632,16 +632,17 @@ public class Agent {
                 probeCell(myCell);
             }
             else if (action == "R") {
-                System.out.println("SAT could not determine, going Random");
-                makeRandomMove();
+//                System.out.println("SAT could not determine, going Random");
+//                makeRandomMove();
+                game.setGameOver(true);
             }
         } catch (ParserException e) {
-            System.out.println("Parser Exception: " + e.getMessage());
+//            System.out.println("Parser Exception: " + e.getMessage());
 
         } catch (ContradictionException e) {
-            System.out.println("Contradiction Exception: " + e.getMessage());
+//            System.out.println("Contradiction Exception: " + e.getMessage());
         } catch (TimeoutException e) {
-            System.out.println("Exception: " + e.getMessage());
+//            System.out.println("Exception: " + e.getMessage());
         }
         return true;
     }
@@ -650,6 +651,7 @@ public class Agent {
      * Method which plays the game. According to the agent type, it will use a method fitting that strategy
      */
     public void playGame() {
+        board.printBoard();
         while (!game.isGameOver()) {
             switch (type) {
                 case "P1":
@@ -670,14 +672,14 @@ public class Agent {
                     makeSPXMove();
 //                    board.printBoard();
                     break;
-                case "SATX":
+                case "P3":
                     clearNeighbours();
-                    System.out.println();
-                    if (!game.isGameWon()) {
+//                    System.out.println();
+//                    if (!game.isGameWon()) {
                         //System.out.println("Making SAT move");
                         makeSATMove();
-                        board.printBoard();
-                    }
+//                        board.printBoard();
+//                    }
                     break;
                 default:
                     break;
@@ -688,7 +690,7 @@ public class Agent {
         board.printBoard();
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
-        } else if (A3main.getAgentType().equals("P2") && game.isGameOver()) {
+        } else if (!A3main.getAgentType().equals("P1") && game.isGameOver()) {
             System.out.println("Result: Agent not terminated");
         } else {
             System.out.println("Result: Agent dead: found mine");
