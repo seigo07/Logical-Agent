@@ -42,7 +42,7 @@ public class Cell {
      */
     public void setHint(char hint) {
         this.hint = hint;
-        if (hint == 't') {
+        if (A3main.getAgentType().equals("P1") && hint == 't') {
             this.hint = '-';
         }
     }

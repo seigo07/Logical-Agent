@@ -206,8 +206,8 @@ public class Agent {
      */
     public void markCell(Cell cell) {
         Cell myCell = findCell(cell.x, cell.y);
-        cell.setHint('D');
-        myCell.setHint('D');
+        cell.setHint('*');
+        myCell.setHint('*');
         tornadoCells.add(cell);
         examinedCells.add(cell);
         unexaminedCells.remove(cell);
@@ -386,7 +386,7 @@ public class Agent {
         int nDangers = 0;
         ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
         for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() == 'D') {
+            if (adjacentCell.getHint() == '*') {
                 nDangers++;
             }
         }
@@ -417,7 +417,7 @@ public class Agent {
     public boolean checkAFN(Cell cell) {
         ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
         for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != 'D') {
+            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != '*') {
                 // AFN situation is true if the number of flagged cells around cell equals hint
                 if (neighbouringDangers(adjacentCell) == Character.getNumericValue(adjacentCell.getHint())) {
                     return true;
@@ -435,7 +435,7 @@ public class Agent {
     public boolean checkAMN(Cell cell) {
         ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
         for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != 'D') {
+            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != '*') {
                 // AMD situation is true if the number of unexamined cells around cell equals hint minus flagged cells
                 if (neighbouringUnknowns(adjacentCell) == (Character.getNumericValue(adjacentCell.getHint() - neighbouringDangers(adjacentCell)))) {
                     return true;
@@ -466,7 +466,8 @@ public class Agent {
         // if no unexamined cell is in an AMN or AFN situation, make random move.
         if (action == "R") {
 //            System.out.println("No SPX, going random.");
-            makeRandomMove();
+//            makeRandomMove();
+            game.setGameOver(true);
         } else if (action == "P") {
             //System.out.println("AFN found, probing");
             probeCell(myCell);
@@ -497,7 +498,7 @@ public class Agent {
 
         // populate the markedNeighbours and unknownCells lists
         for (Cell myCell : neighbours) {
-            if (myCell.getHint() == 'D') {
+            if (myCell.getHint() == '*') {
                 markedNeighbours.add(myCell);
             } else if (myCell.getHint() == '?') {
                 unknownCells.add(myCell);
@@ -665,11 +666,9 @@ public class Agent {
                 case "P2":
                     clearNeighbours();
 //                    System.out.println();
-                    if (!game.isGameWon()) {
-                        //System.out.println("Making SPX move");
-                        makeSPXMove();
-//                        board.printBoard();
-                    }
+//                    System.out.println("Making SPX move");
+                    makeSPXMove();
+//                    board.printBoard();
                     break;
                 case "SATX":
                     clearNeighbours();
@@ -689,10 +688,10 @@ public class Agent {
         board.printBoard();
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
-//            System.out.println();
+        } else if (A3main.getAgentType().equals("P2") && game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
         } else {
             System.out.println("Result: Agent dead: found mine");
-//            System.out.println();
         }
     }
 

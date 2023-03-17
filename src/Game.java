@@ -51,12 +51,14 @@ public class Game {
                 // remove cell from list holding the covered cells
                 coveredCells.remove(cell);
                 // if the cell uncovered is a tornado, game is over
-                if (cell.getHint() == 't') {
+                if (cell.getHint() == 't' && A3main.getAgentType().equals("P1")) {
                     gameOver = true;
                 }
                 // if checkGameWon returns true
                 else if (checkGameWon()) {
-                    gameOver = true;
+                    if (A3main.getAgentType().equals("P1")) {
+                        gameOver = true;
+                    }
                     gameWon = true;
                 }
                 return cell;
@@ -110,6 +112,14 @@ public class Game {
      */
     public boolean isGameWon() {
         return gameWon;
+    }
+
+    /**
+     * Simplge getter
+     * @return boolean value of whether the game is over
+     */
+    public void setGameOver(boolean isGameOver) {
+        this.gameOver = isGameOver;
     }
 
 }
