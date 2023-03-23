@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.Random;
+
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Formula;
 import org.logicng.io.parsers.ParserException;
@@ -12,53 +12,44 @@ import org.sat4j.specs.TimeoutException;
 
 public class Agent {
 
-    // type of Agent i.e. RPX, SPX or SAT
-    private String type;
-    // instance of Game class
     private Game game;
-    // represents the agent's board view. This is distinct from the game's board view
+    // Agent's board. which is distinct from the game's one
     private Board board;
-    // list holding all the Cell objects of the board
-    private ArrayList<Cell> allCells;
-    // list holding all the unexamined cells of the board
-    private ArrayList<Cell> unexaminedCells;
-    // list holding all the examined cells of the board. A cell marked as a danger/tornado is also considered examined
-    private ArrayList<Cell> examinedCells;
-    // list holding all the uncovered cells of the board
+    // Cells on the board
+    private ArrayList<Cell> cells;
+    // Unproved cells on the board
+    private ArrayList<Cell> unprovedCells;
+    // Proved cells on the board
+    private ArrayList<Cell> provedCells;
+    // Uncovered cells on the board
     private ArrayList<Cell> uncoveredCells;
-    // list holding all the cells marked as tornado cells
+    // Tornado cells
     private ArrayList<Cell> tornadoCells;
-    // holds the length of the board
+    // The length of the board
     private int boardLength;
-    // holds the number of Cells with a hint of 0 whose neighbours have not been probed yet.
+    // The number of cells whose hint is 0 and neighbours have not been probed yet.
     private int cellsWithFreeNeighbours;
-    // used for parsing the string representation of the knowledge base into a logical formula
     private FormulaFactory f = new FormulaFactory();
     private PropositionalParser p = new PropositionalParser(f);
 
     /**
-     * Class constructor
-     * @param type agent type
-     * @param game instance of Game class
+     * Constructor
+     *
+     * @param game
      */
-    public Agent(String type, Game game) {
-        this.type = type;
+    public Agent(Game game) {
         this.game = game;
-        // the board length is the only piece of information the agent gets from the game instance
         this.boardLength = this.game.getBoard().board.length;
-        this.allCells = new ArrayList<>();
-        this.unexaminedCells = new ArrayList<>();
-        this.tornadoCells = new ArrayList<>();
         this.board = new Board(new char[boardLength][boardLength]);
-        this.examinedCells = new ArrayList<>();
+        this.cells = new ArrayList<>();
+        this.unprovedCells = new ArrayList<>();
+        this.provedCells = new ArrayList<>();
+        this.tornadoCells = new ArrayList<>();
         this.uncoveredCells = new ArrayList<>();
         this.cellsWithFreeNeighbours = 0;
-        // populate the board
-        populateBoard();
-        // populate the lists
-        populateCells();
-        // probe the hint cells -> top left corner & middle cells
-        probeHintCells();
+        initBoard();
+        initCells();
+        proveHintCells();
     }
 
     /** -------------------------------------------- GENERAL METHODS ------------------------------------------------**/
@@ -67,6 +58,7 @@ public class Agent {
     /**
      * Method which creates permutations of strings in a list. Used to generate the encoding of the knowledge base
      * as a string.
+     *
      * @param list the list containing the strings to be permuted
      * @return a list of the permutations i.e. a list containing the permutations of the list passed as a parameter
      * code adapted from: https://stackoverflow.com/questions/24460480/permutation-of-an-arraylist-of-numbers-using-recursion
@@ -96,59 +88,56 @@ public class Agent {
     }
 
     /**
-     * Method which initialises the board view of the agent. At t0 they are all unknown, represented by '?'
+     * Initialises the agent board.
      */
-    public void populateBoard() {
+    public void initBoard() {
+        // Set '?' at first
         for (int i = 0; i < boardLength; i++) {
             for (int j = 0; j < boardLength; j++) {
                 board.board[j][i] = '?';
             }
         }
-//        System.out.println("Agent board view at t0");
         if (A3main.getVerbose()) {
             board.printBoard();
         }
     }
 
     /**
-     * Method which initialises the unexaminedCells and allCells lists
+     * Initialises the cells and unprovedCells
      */
-    public void populateCells() {
+    public void initCells() {
         for (int i = 0; i < boardLength; i++) {
             for (int j = 0; j < boardLength; j++) {
                 Cell cell = new Cell(j, i, '?');
-                unexaminedCells.add(cell);
-                allCells.add(cell);
+                cells.add(cell);
+                unprovedCells.add(cell);
             }
         }
     }
 
     /**
-     * Method which probes the hint cells
+     * Prove top-left and center
      */
-    public void probeHintCells() {
-//        System.out.println("Probing hint cells");
-//        System.out.println();
+    public void proveHintCells() {
         Cell cell = findCell(0, 0);
         probeCell(cell);
         if (!A3main.getAgentType().equals("P1")) {
             cell = findCell(boardLength / 2, boardLength / 2);
             probeCell(cell);
         }
-//        System.out.println("Agent board view at t1");
-//        board.printBoard();
     }
 
     /**
      * Method which returns the Cell object from the unexaminedCells list with coordinates passed as parameters
+     *
      * @param x coordinate
      * @param y coordinate
      * @return Cell object at coordinates x and y
      */
     public Cell findUnexaminedCell(int x, int y) {
-        for (int i = 0; i < unexaminedCells.size(); i++) {
-            if (unexaminedCells.get(i).x == x && unexaminedCells.get(i).y == y) {
-                return unexaminedCells.get(i);
+        for (int i = 0; i < unprovedCells.size(); i++) {
+            if (unprovedCells.get(i).x == x && unprovedCells.get(i).y == y) {
+                return unprovedCells.get(i);
             }
         }
         // if cell has been examined before
@@ -157,14 +146,15 @@ public class Agent {
 
     /**
      * Method which returns the Cell object from the allCells list with coordinates passed as parameters
+     *
      * @param x coordinate
      * @param y coordinate
      * @return Cell object at coordinates x and y
      */
     public Cell findCell(int x, int y) {
-        for (int i = 0; i < allCells.size(); i++) {
-            if (allCells.get(i).x == x && allCells.get(i).y == y) {
-                return allCells.get(i);
+        for (int i = 0; i < cells.size(); i++) {
+            if (cells.get(i).x == x && cells.get(i).y == y) {
+                return cells.get(i);
             }
         }
         // if cell does not exist
@@ -174,6 +164,7 @@ public class Agent {
     /**
      * Method which uncovers cell passed as a parameter. It gets the information about the Cell at that position from
      * the game instance. It updates the lists and prints out the appropriate message.
+     *
      * @param cell
      */
     public void probeCell(Cell cell) {
@@ -181,8 +172,8 @@ public class Agent {
         Cell perceivedCell = game.uncoverCell(cell.x, cell.y);
         cell.setHint(perceivedCell.getHint());
         myCell.setHint(perceivedCell.getHint());
-        unexaminedCells.remove(cell);
-        examinedCells.add(cell);
+        unprovedCells.remove(cell);
+        provedCells.add(cell);
         uncoveredCells.add(cell);
         board.board[cell.y][cell.x] = cell.getHint();
         if (cell.getHint() == 't') {
@@ -193,8 +184,7 @@ public class Agent {
             cellsWithFreeNeighbours++;
 //            System.out.println("probe " + cell.toString());
 
-        }
-        else {
+        } else {
 //            System.out.println("probe " + cell.toString());
         }
         //System.out.println();
@@ -202,6 +192,7 @@ public class Agent {
 
     /**
      * Method which marks the Cell objects passed as a parameter as a danger cell i.e. flag it. Used by the SPX agent.
+     *
      * @param cell to be marked as a 'danger'.
      */
     public void markCell(Cell cell) {
@@ -209,8 +200,8 @@ public class Agent {
         cell.setHint('*');
         myCell.setHint('*');
         tornadoCells.add(cell);
-        examinedCells.add(cell);
-        unexaminedCells.remove(cell);
+        provedCells.add(cell);
+        unprovedCells.remove(cell);
         board.board[cell.y][cell.x] = cell.getHint();
 //        System.out.println("mark " + cell.toString());
 //        System.out.println();
@@ -218,11 +209,12 @@ public class Agent {
 
     /**
      * Method which returns whether a Cell object has been examined before
+     *
      * @param adjacentCell
      * @return
      */
     public boolean hasBeenExamined(Cell adjacentCell) {
-        for (Cell cell : examinedCells) {
+        for (Cell cell : provedCells) {
             if (cell.x == adjacentCell.x && cell.y == adjacentCell.y) {
                 return true;
             }
@@ -232,6 +224,7 @@ public class Agent {
 
     /**
      * Method which returns all the neighbouring cells of a cell passed as a parameter
+     *
      * @param cell whose neighbours are to be found
      * @return an ArrayList containing the neighbours of the parameter Cell object.
      */
@@ -293,7 +286,7 @@ public class Agent {
     public void uncoverAllClearNeighbours() {
         // list holding cells that are adjacent to a cell with hint 0. These cells can be probed
         ArrayList<Cell> adjacentCells = new ArrayList<>();
-        for (Cell cell : examinedCells) {
+        for (Cell cell : provedCells) {
             if (cell.getHint() == '0') {
                 if (cell.x > 0 && cell.y > 0) {
                     // check if already probed
@@ -360,6 +353,7 @@ public class Agent {
 
     /**
      * Method which returns the number of flagged cells around the cell passed as a parameter
+     *
      * @param cell
      * @return integer value of number of flagged cells around the cell passed as a parameter
      */
@@ -377,6 +371,7 @@ public class Agent {
 
     /**
      * Method which returns the number of unexamined cells around the cell passed as a parameter
+     *
      * @param cell
      * @returni nteger value of number of unexamined cells around the cell passed as a parameter
      */
@@ -393,6 +388,7 @@ public class Agent {
 
     /**
      * Method which checks whether the Cell object passed as a parameter is in an AFN situation.
+     *
      * @param cell
      * @return true if the cell is in an AFN situation
      */
@@ -411,6 +407,7 @@ public class Agent {
 
     /**
      * Method which checks whether the Cell object passed as a parameter is in an AMN situation
+     *
      * @param cell
      * @return true if the cells is in an AMN situation
      */
@@ -434,7 +431,7 @@ public class Agent {
         Cell myCell = null;
         String action = "R";
         // iterate all unprobed cell to find situations of AFN or AMN
-        for (Cell cell : unexaminedCells) {
+        for (Cell cell : unprovedCells) {
             if (checkAFN(cell)) {
                 action = "P";
                 myCell = cell;
@@ -465,6 +462,7 @@ public class Agent {
     /**
      * Method which takes an uncovered Cell object as a parameter and it evaluates its surroundings in order to construct
      * a logical formula.
+     *
      * @param cell
      * @return a String representing a logical formula with information about the parameter's surrounding cells.
      */
@@ -492,7 +490,7 @@ public class Agent {
         for (Cell unknownCell : unknownCells) {
             literals.add("T" + unknownCell.x + unknownCell.y);
         }
-        for (Cell markedCell: markedNeighbours) {
+        for (Cell markedCell : markedNeighbours) {
             markedLiterals.add("T" + markedCell.x + markedCell.y);
         }
 
@@ -542,6 +540,7 @@ public class Agent {
     /**
      * Method which taked all uncoveredCells as a parameter, and created a logical formula with all the possibilities
      * of where tornados could possibly be.
+     *
      * @param uncoveredCells cells that have been uncovered i.e. probed
      * @return a String representation of the knowledge base.
      */
@@ -598,7 +597,7 @@ public class Agent {
             }
             // for every unexamined cells check whether the possibility of it containing a tornado is satisfiable.
             // if not then it means that the cell can be probed safely.
-            for (Cell cell : unexaminedCells) {
+            for (Cell cell : unprovedCells) {
                 String clause = "T" + Integer.toString(cell.x) + Integer.toString(cell.y);
                 if (dimacsGenerator.getLiteralsHashMap().containsKey(clause)) {
                     int literal = dimacsGenerator.getLiteralsHashMap().get(clause);
@@ -612,8 +611,7 @@ public class Agent {
             }
             if (action == "P") {
                 probeCell(myCell);
-            }
-            else if (action == "R") {
+            } else if (action == "R") {
 //                System.out.println("SAT could not determine, going Random");
 //                makeRandomMove();
                 game.setGameOver(true);
@@ -639,7 +637,7 @@ public class Agent {
                 if (A3main.getVerbose()) {
                     board.printBoard();
                 }
-                probeCell(unexaminedCells.get(0));
+                probeCell(unprovedCells.get(0));
             }
         }
         System.out.println("Final map");
@@ -679,9 +677,9 @@ public class Agent {
             makeSATMove();
         }
         if (game.isGameWon()) {
-            while (unexaminedCells.size() > 0) {
+            while (unprovedCells.size() > 0) {
                 Cell myCell = null;
-                for (Cell cell : unexaminedCells) {
+                for (Cell cell : unprovedCells) {
                     if (cell.getHint() == '?') {
                         myCell = cell;
                     }
@@ -709,9 +707,9 @@ public class Agent {
             makeSATMove();
         }
         if (game.isGameWon()) {
-            while (unexaminedCells.size() > 0) {
+            while (unprovedCells.size() > 0) {
                 Cell myCell = null;
-                for (Cell cell : unexaminedCells) {
+                for (Cell cell : unprovedCells) {
                     if (cell.getHint() == '?') {
                         myCell = cell;
                     }

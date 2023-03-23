@@ -37,7 +37,7 @@ public class A3main {
 
         agentType = args[0];
         game = new Game(p);
-        agent = new Agent(agentType, game);
+        agent = new Agent(game);
 
         switch (agentType) {
             case "P1":
