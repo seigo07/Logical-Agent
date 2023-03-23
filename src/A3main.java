@@ -1,7 +1,4 @@
 
-import java.util.ArrayList;
-
-
 public class A3main {
 
 	// instance of Agent i.e. either RPX, SPX, SATX
@@ -44,7 +41,7 @@ public class A3main {
 			game = new Game(p);
 //			game.getBoard().printBoard();
 			agent = new Agent(agentType, game);
-			agent.playGame();
+			agent.playBasic();
 			break;
 		case "P2":
 			game = new Game(p);
@@ -68,13 +65,6 @@ public class A3main {
 			//TODO: Part 5
 			break;
 		}
-
-
-		//templates to print results - copy to appropriate places
-		//System.out.println("\nResult: Agent alive: all solved\n");
-		//System.out.println("\nResult: Agent dead: found mine\n");
-		//System.out.println("\nResult: Agent not terminated\n");
-
 	}
 
 	

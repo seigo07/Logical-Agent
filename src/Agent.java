@@ -718,4 +718,25 @@ public class Agent {
         }
     }
 
+    /**
+     * Play Basic Tornado Sweeper Agent
+     */
+    public void playBasic() {
+        while (!game.isGameOver()) {
+            clearNeighbours();
+            if (!game.isGameWon()) {
+                if (A3main.getVerbose()) {
+                    board.printBoard();
+                }
+                makeMove();
+            }
+        }
+        System.out.println("Final map");
+        board.printBoard();
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
 }
