@@ -29,7 +29,6 @@ public class A3main {
         System.out.println("Agent " + args[0] + " plays " + args[1] + "\n");
 
         // World
-
         World world = World.valueOf(args[1]);
 
         char[][] p = world.map;
@@ -48,10 +47,10 @@ public class A3main {
                 agent.playBeginner();
                 break;
             case "P3":
-                agent.playGame();
+                agent.playIntermediateDNF();
                 break;
             case "P4":
-                agent.playGame();
+                agent.playIntermediateCNF();
                 break;
             case "P5":
                 //TODO: Part 5

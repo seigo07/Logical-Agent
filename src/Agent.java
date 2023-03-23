@@ -648,77 +648,6 @@ public class Agent {
     }
 
     /**
-     * Method which plays the game. According to the agent type, it will use a method fitting that strategy
-     */
-    public void playGame() {
-        while (!game.isGameOver()) {
-            switch (type) {
-                case "P1":
-                    clearNeighbours();
-//                    System.out.println();
-                    if (!game.isGameWon()) {
-                        //System.out.println("Making random move");
-                        if (A3main.getVerbose()) {
-                            board.printBoard();
-                        }
-                        makeMove();
-                    }
-                    break;
-                case "P2":
-                    clearNeighbours();
-//                    System.out.println();
-//                    System.out.println("Making SPX move");
-                    makeSPXMove();
-//                    board.printBoard();
-                    break;
-                case "P3":
-                    clearNeighbours();
-//                    System.out.println();
-//                    if (!game.isGameWon()) {
-                        //System.out.println("Making SAT move");
-                        makeSATMove();
-//                        board.printBoard();
-//                    }
-                    break;
-                case "P4":
-                    clearNeighbours();
-//                    System.out.println();
-//                    if (!game.isGameWon()) {
-                    //System.out.println("Making SAT move");
-                    makeSATMove();
-//                        board.printBoard();
-//                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        if (A3main.getAgentType().equals("P3") || A3main.getAgentType().equals("P4")) {
-            if (game.isGameWon()) {
-                while (unexaminedCells.size() > 0) {
-                    Cell myCell = null;
-                    for (Cell cell : unexaminedCells) {
-                        if (cell.getHint() == '?') {
-                            myCell = cell;
-                        }
-                    }
-                    markCell(myCell);
-                }
-            }
-        }
-        // depending on whether the game has been won or not, it will return the appropriate string
-        System.out.println("Final map");
-        board.printBoard();
-        if (game.isGameWon()) {
-            System.out.println("Result: Agent alive: all solved");
-        } else if (!A3main.getAgentType().equals("P1") && game.isGameOver()) {
-            System.out.println("Result: Agent not terminated");
-        } else {
-            System.out.println("Result: Agent dead: found mine");
-        }
-    }
-
-    /**
      * Play Basic Tornado Sweeper Agent
      */
     public void playBasic() {
@@ -747,6 +676,66 @@ public class Agent {
         while (!game.isGameOver()) {
             clearNeighbours();
             makeSPXMove();
+        }
+        System.out.println("Final map");
+        board.printBoard();
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Intermediate Tornado Sweeper Agent with DNF encoding
+     */
+    public void playIntermediateDNF() {
+        while (!game.isGameOver()) {
+            clearNeighbours();
+            makeSATMove();
+        }
+        if (game.isGameWon()) {
+            while (unexaminedCells.size() > 0) {
+                Cell myCell = null;
+                for (Cell cell : unexaminedCells) {
+                    if (cell.getHint() == '?') {
+                        myCell = cell;
+                    }
+                }
+                markCell(myCell);
+            }
+        }
+        System.out.println("Final map");
+        board.printBoard();
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Intermediate Tornado Sweeper Agent with CNF encoding
+     */
+    public void playIntermediateCNF() {
+        while (!game.isGameOver()) {
+            clearNeighbours();
+            makeSATMove();
+        }
+        if (game.isGameWon()) {
+            while (unexaminedCells.size() > 0) {
+                Cell myCell = null;
+                for (Cell cell : unexaminedCells) {
+                    if (cell.getHint() == '?') {
+                        myCell = cell;
+                    }
+                }
+                markCell(myCell);
+            }
         }
         System.out.println("Final map");
         board.printBoard();
