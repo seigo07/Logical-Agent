@@ -638,12 +638,12 @@ public class Agent {
             }
         } catch (ParserException e) {
 //            System.out.println("Parser Exception: " + e.getMessage());
-
         } catch (ContradictionException e) {
 //            System.out.println("Contradiction Exception: " + e.getMessage());
         } catch (TimeoutException e) {
 //            System.out.println("Exception: " + e.getMessage());
         }
+
         return true;
     }
 
@@ -651,7 +651,6 @@ public class Agent {
      * Method which plays the game. According to the agent type, it will use a method fitting that strategy
      */
     public void playGame() {
-        board.printBoard();
         while (!game.isGameOver()) {
             switch (type) {
                 case "P1":
@@ -678,6 +677,15 @@ public class Agent {
 //                    if (!game.isGameWon()) {
                         //System.out.println("Making SAT move");
                         makeSATMove();
+//                        board.printBoard();
+//                    }
+                    break;
+                case "P4":
+                    clearNeighbours();
+//                    System.out.println();
+//                    if (!game.isGameWon()) {
+                    //System.out.println("Making SAT move");
+                    makeSATMove();
 //                        board.printBoard();
 //                    }
                     break;

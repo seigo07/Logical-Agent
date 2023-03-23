@@ -59,7 +59,10 @@ public class A3main {
 			agent.playGame();
 			break;
 		case "P4":
-			//TODO: Part 4
+			game = new Game(p);
+//			game.getBoard().printBoard();
+			agent = new Agent(agentType, game);
+			agent.playGame();
 			break;
 		case "P5":
 			//TODO: Part 5
