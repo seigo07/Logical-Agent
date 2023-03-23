@@ -40,9 +40,9 @@ public class Cell {
      * Simple setter
      * @param hint the value to be set as the hint attribute of the Cell object
      */
-    public void setHint(char hint) {
+    public void setHint(char hint, String type) {
         this.hint = hint;
-        if (A3main.getAgentType().equals("P1") && hint == 't') {
+        if (type.equals("P1") && hint == 't') {
             this.hint = '-';
         }
     }

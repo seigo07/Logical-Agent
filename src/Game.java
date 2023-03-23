@@ -44,19 +44,19 @@ public class Game {
      * @param y coordinate
      * @return Cell object uncovered containing details about coordinates and hint
      */
-    public Cell uncoverCell(int x, int y) {
+    public Cell uncoverCell(int x, int y, String type) {
         for (int i = 0; i < allCells.size(); i++) {
             if (allCells.get(i).x == x && allCells.get(i).y == y) {
                 Cell cell = allCells.get(i);
                 // remove cell from list holding the covered cells
                 coveredCells.remove(cell);
                 // if the cell uncovered is a tornado, game is over
-                if (cell.getHint() == 't' && !A3main.getAgentType().equals("P2")) {
+                if (cell.getHint() == 't' && !type.equals("P2")) {
                     gameOver = true;
                 }
                 // if checkGameWon returns true
                 else if (checkGameWon()) {
-                    if (!A3main.getAgentType().equals("P2")) {
+                    if (!type.equals("P2")) {
                         gameOver = true;
                     }
                     gameWon = true;

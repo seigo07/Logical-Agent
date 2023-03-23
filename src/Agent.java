@@ -12,6 +12,8 @@ import org.sat4j.specs.TimeoutException;
 
 public class Agent {
 
+    private String type;
+    private boolean verbose;
     private Game game;
     // Agent's board. which is distinct from the game's one
     private char[][] board;
@@ -37,7 +39,9 @@ public class Agent {
      *
      * @param game
      */
-    public Agent(Game game) {
+    public Agent(String type, boolean verbose, Game game) {
+        this.type = type;
+        this.verbose = verbose;
         this.game = game;
         this.boardLength = this.game.getBoard().length;
         this.board = new char[boardLength][boardLength];
@@ -97,7 +101,7 @@ public class Agent {
                 board[j][i] = '?';
             }
         }
-        if (A3main.getVerbose()) {
+        if (this.verbose) {
             A3main.printBoard(board);
         }
     }
@@ -121,7 +125,7 @@ public class Agent {
     public void proveHintCells() {
         Cell cell = findCell(0, 0);
         probeCell(cell);
-        if (!A3main.getAgentType().equals("P1")) {
+        if (!this.type.equals("P1")) {
             cell = findCell(boardLength / 2, boardLength / 2);
             probeCell(cell);
         }
@@ -167,9 +171,9 @@ public class Agent {
      */
     public void probeCell(Cell cell) {
         Cell myCell = findCell(cell.x, cell.y);
-        Cell perceivedCell = game.uncoverCell(cell.x, cell.y);
-        cell.setHint(perceivedCell.getHint());
-        myCell.setHint(perceivedCell.getHint());
+        Cell perceivedCell = game.uncoverCell(cell.x, cell.y ,this.type);
+        cell.setHint(perceivedCell.getHint(), this.type);
+        myCell.setHint(perceivedCell.getHint(), this.type);
         unprovedCells.remove(cell);
         provedCells.add(cell);
         uncoveredCells.add(cell);
@@ -195,8 +199,8 @@ public class Agent {
      */
     public void markCell(Cell cell) {
         Cell myCell = findCell(cell.x, cell.y);
-        cell.setHint('*');
-        myCell.setHint('*');
+        cell.setHint('*', this.type);
+        myCell.setHint('*', this.type);
         tornadoCells.add(cell);
         provedCells.add(cell);
         unprovedCells.remove(cell);
@@ -612,13 +616,36 @@ public class Agent {
     }
 
     /**
+     * Play game based on the agent type
+     */
+    public void playGame() {
+        switch (type) {
+            case "P1":
+                playBasic();
+                break;
+            case "P2":
+                playBeginner();
+                break;
+            case "P3":
+                playIntermediateDNF();
+                break;
+            case "P4":
+                playIntermediateCNF();
+                break;
+            case "P5":
+                //TODO: Part 5
+                break;
+        }
+    }
+
+    /**
      * Play Basic Tornado Sweeper Agent
      */
     public void playBasic() {
         while (!game.isGameOver()) {
             uncoverNeighbours();
             if (!game.isGameWon()) {
-                if (A3main.getVerbose()) {
+                if (this.verbose) {
                     A3main.printBoard(board);
                 }
                 probeCell(unprovedCells.get(0));

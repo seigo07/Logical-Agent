@@ -1,24 +1,9 @@
 
 public class A3main {
 
-    // instance of Agent i.e. either RPX, SPX, SATX
-    private static Agent agent;
-    // instance of Game, holding the actual world view as well as the state of the game e.g game is over, game is won
-    private static Game game;
-    private static boolean verbose;
-    private static String agentType;
-
-    public static String getAgentType() {
-        return agentType;
-    }
-
-    public static boolean getVerbose() {
-        return verbose;
-    }
-
     public static void main(String[] args) {
 
-        verbose = false; //prints the formulas for SAT if true
+        boolean verbose = false; //prints the formulas for SAT if true
         if (args.length > 2 && args[2].equals("verbose")) {
             verbose = true; //prints the formulas for SAT if true
         }
@@ -35,27 +20,10 @@ public class A3main {
         printBoard(p);
         System.out.println("Start!");
 
-        agentType = args[0];
-        game = new Game(p);
-        agent = new Agent(game);
-
-        switch (agentType) {
-            case "P1":
-                agent.playBasic();
-                break;
-            case "P2":
-                agent.playBeginner();
-                break;
-            case "P3":
-                agent.playIntermediateDNF();
-                break;
-            case "P4":
-                agent.playIntermediateCNF();
-                break;
-            case "P5":
-                //TODO: Part 5
-                break;
-        }
+        String type = args[0];
+        Game game = new Game(p);
+        Agent agent = new Agent(type, verbose, game);
+        agent.playGame();
     }
 
     //prints the board in the required format - PLEASE DO NOT MODIFY
