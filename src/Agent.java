@@ -693,6 +693,19 @@ public class Agent {
                     break;
             }
         }
+        if (A3main.getAgentType().equals("P3") || A3main.getAgentType().equals("P4")) {
+            if (game.isGameWon()) {
+                while (unexaminedCells.size() > 0) {
+                    Cell myCell = null;
+                    for (Cell cell : unexaminedCells) {
+                        if (cell.getHint() == '?') {
+                            myCell = cell;
+                        }
+                    }
+                    markCell(myCell);
+                }
+            }
+        }
         // depending on whether the game has been won or not, it will return the appropriate string
         System.out.println("Final map");
         board.printBoard();
