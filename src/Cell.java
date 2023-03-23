@@ -1,17 +1,15 @@
 public class Cell {
 
-    // x coordinate
     int x;
-    // y coordinate
     int y;
-    // the cell's hint e.g. 1,2, ?, D, t
     char hint;
 
     /**
-     * Class constructor
-     * @param x coordinate
-     * @param y coordinate
-     * @param hint the hint of the cell
+     * Constructor
+     *
+     * @param x
+     * @param y
+     * @param hint
      */
     public Cell(int x, int y, char hint) {
         this.x = x;
@@ -20,8 +18,9 @@ public class Cell {
     }
 
     /**
-     * Overriden to String method
-     * @return a readable string giving information about the sell
+     * Override toString
+     *
+     * @return a readable information string for cell
      */
     @Override
     public String toString() {
@@ -29,20 +28,23 @@ public class Cell {
     }
 
     /**
-     * Simple getter
-     * @return the hint parameter of the Cell object
+     * Getter
+     *
+     * @return hint
      */
     public char getHint() {
         return hint;
     }
 
     /**
-     * Simple setter
-     * @param hint the value to be set as the hint attribute of the Cell object
+     * Setter
+     *
+     * @param hint
+     * @param type (agent)
      */
-    public void setHint(char hint) {
+    public void setHint(char hint, String type) {
         this.hint = hint;
-        if (A3main.getAgentType().equals("P1") && hint == 't') {
+        if (type.equals("P1") && hint == 't') {
             this.hint = '-';
         }
     }
