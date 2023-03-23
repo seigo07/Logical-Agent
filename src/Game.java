@@ -3,37 +3,35 @@ import java.util.ArrayList;
 public class Game {
 
     private char[][] board;
-    // list holding all of the Cell objects
-    private ArrayList<Cell> allCells;
-    // list holding the cells which have not been uncovered yet
+    private boolean isGameOver;
+    private boolean isGameWon;
+    // Cells on the board
+    private ArrayList<Cell> cells;
+    // Covered cells on the board
     private ArrayList<Cell> coveredCells;
-    // holds whether game is over
-    private boolean gameOver;
-    // holds whether game has been won
-    private boolean gameWon;
 
     /**
-     * Class constructor
+     * Constructor
      *
-     * @param worldMap name of the world e.g. S1, M3, L5 etc.
+     * @param worldMap
      */
     public Game(char[][] worldMap) {
         this.board = worldMap;
-        this.gameOver = false;
-        this.gameWon = false;
-        this.allCells = new ArrayList<>();
+        this.isGameOver = false;
+        this.isGameWon = false;
+        this.cells = new ArrayList<>();
         this.coveredCells = new ArrayList<>();
-        populateCells();
+        initCells();
     }
 
     /**
-     * Method which populates the allCells and coveredCells array. In the beginning all the cells are covered.
+     * Initialises the cells and coveredCells
      */
-    private void populateCells() {
+    private void initCells() {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
                 Cell cell = new Cell(i, j, board[j][i]);
-                allCells.add(cell);
+                cells.add(cell);
                 coveredCells.add(cell);
             }
         }
@@ -47,16 +45,16 @@ public class Game {
      * @return proved cell
      */
     public Cell uncoverCell(int x, int y, String type) {
-        for (Cell cell: allCells) {
+        for (Cell cell: cells) {
             if (cell.x == x && cell.y == y) {
                 coveredCells.remove(cell);
                 if (cell.getHint() == 't' && !type.equals("P2")) {
-                    gameOver = true;
+                    isGameOver = true;
                 } else if (checkGameWon()) {
                     if (!type.equals("P2")) {
-                        gameOver = true;
+                        isGameOver = true;
                     }
-                    gameWon = true;
+                    isGameWon = true;
                 }
                 return cell;
             }
@@ -65,18 +63,15 @@ public class Game {
     }
 
     /**
-     * Method which checks whether all the remaining covered cells are tornadoes.
-     * Provides ability to 'determine if game is over'
+     * Check whether all the remaining covered cells are tornadoes.
      *
-     * @return true if all the remaining covered cells are tornadoes
+     * @return true
      */
     public boolean checkGameWon() {
         if (coveredCells.size() == 0) {
             return true;
         } else {
-            for (int i = 0; i < coveredCells.size(); i++) {
-                Cell cell = coveredCells.get(i);
-                // if at least one covered cell is not a tornado it means game has not been won
+            for (Cell cell: coveredCells) {
                 if (board[cell.y][cell.x] != 't') {
                     return false;
                 }
@@ -86,7 +81,7 @@ public class Game {
     }
 
     /**
-     * Simple getter
+     * Getter
      *
      * @return board
      */
@@ -95,31 +90,31 @@ public class Game {
     }
 
     /**
-     * Simplge getter
+     * Getter
      *
-     * @return boolean value of whether the game is over
+     * @return isGameOver
      */
     public boolean isGameOver() {
-        return gameOver;
+        return isGameOver;
     }
 
 
     /**
-     * Simple getter
+     * Getter
      *
-     * @return boolean value of whether the game has been won
+     * @return isGameWon
      */
     public boolean isGameWon() {
-        return gameWon;
+        return isGameWon;
     }
 
     /**
-     * Simplge getter
+     * Setter
      *
-     * @return boolean value of whether the game is over
+     * @param isGameOver
      */
     public void setGameOver(boolean isGameOver) {
-        this.gameOver = isGameOver;
+        this.isGameOver = isGameOver;
     }
 
 }
