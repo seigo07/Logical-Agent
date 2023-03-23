@@ -63,7 +63,7 @@ public class Game {
     }
 
     /**
-     * Check whether all the remaining covered cells are tornadoes.
+     * Check the tornadoes in the remaining cells
      *
      * @return true
      */

@@ -57,14 +57,12 @@ public class Agent {
     }
 
     /**
-     * Method which creates permutations of strings in a list. Used to generate the encoding of the knowledge base
-     * as a string.
+     * Generate the strings of permutations
      *
-     * @param list the list containing the strings to be permuted
-     * @return a list of the permutations i.e. a list containing the permutations of the list passed as a parameter
-     * code adapted from: https://stackoverflow.com/questions/24460480/permutation-of-an-arraylist-of-numbers-using-recursion
+     * @param list
+     * @return permutations
      */
-    public ArrayList<ArrayList<String>> listPermutations(ArrayList<String> list) {
+    public ArrayList<ArrayList<String>> getPermutations(ArrayList<String> list) {
 
         if (list.size() == 0) {
             ArrayList<ArrayList<String>> result = new ArrayList<>();
@@ -72,20 +70,19 @@ public class Agent {
             return result;
         }
 
-        ArrayList<ArrayList<String>> returnMe = new ArrayList<>();
-
+        ArrayList<ArrayList<String>> permutations = new ArrayList<>();
         String firstElement = list.remove(0);
+        ArrayList<ArrayList<String>> recursivePermutations = getPermutations(list);
 
-        ArrayList<ArrayList<String>> recursiveReturn = listPermutations(list);
-        for (ArrayList<String> li : recursiveReturn) {
-            for (int index = 0; index <= li.size(); index++) {
-                ArrayList<String> temp = new ArrayList<>(li);
-                temp.add(index, firstElement);
-                returnMe.add(temp);
+        for (ArrayList<String> rp : recursivePermutations) {
+            for (int index = 0; index <= rp.size(); index++) {
+                ArrayList<String> p = new ArrayList<>(rp);
+                p.add(index, firstElement);
+                permutations.add(p);
             }
 
         }
-        return returnMe;
+        return permutations;
     }
 
     /**
@@ -407,115 +404,95 @@ public class Agent {
         }
     }
 
-    /** -------------------------------------------- SAT METHODS ------------------------------------------------**/
-
-
     /**
-     * Method which takes an uncovered Cell object as a parameter and it evaluates its surroundings in order to construct
-     * a logical formula.
+     * Build clause based on the surroundings of given cell
      *
      * @param cell
-     * @return a String representing a logical formula with information about the parameter's surrounding cells.
+     * @return a logical formula
      */
-    public String createClause(Cell cell) {
+    public String buildClause(Cell cell) {
 
-        // get all the neighbours of the cell
         ArrayList<Cell> neighbours = getNeighbours(cell);
-        // contains unknown neighbours of parameter cell
-        ArrayList<Cell> unknownCells = new ArrayList<>();
-        // contains marked neighbours of parameter cell
-        ArrayList<Cell> markedNeighbours = new ArrayList<>();
-        ArrayList<String> markedLiterals = new ArrayList<>();
+        ArrayList<Cell> unknowns = new ArrayList<>();
+        ArrayList<Cell> dangerousNeighbours = new ArrayList<>();
+        ArrayList<String> dangerousLiterals = new ArrayList<>();
 
-        // populate the markedNeighbours and unknownCells lists
-        for (Cell myCell : neighbours) {
-            if (myCell.getHint() == '*') {
-                markedNeighbours.add(myCell);
-            } else if (myCell.getHint() == '?') {
-                unknownCells.add(myCell);
+        // Initialise the markedNeighbours and unknowns
+        for (Cell c : neighbours) {
+            if (c.getHint() == '*') {
+                dangerousNeighbours.add(c);
+            } else if (c.getHint() == '?') {
+                unknowns.add(c);
             }
         }
 
-        // create the literals of each cell
+        // Generate the literals
         ArrayList<String> literals = new ArrayList<>();
-        for (Cell unknownCell : unknownCells) {
-            literals.add("T" + unknownCell.x + unknownCell.y);
+        for (Cell unknown: unknowns) {
+            literals.add("T" + unknown.x + unknown.y);
         }
-        for (Cell markedCell : markedNeighbours) {
-            markedLiterals.add("T" + markedCell.x + markedCell.y);
+        for (Cell dangerousNeighbour : dangerousNeighbours) {
+            dangerousLiterals.add("T" + dangerousNeighbour.x + dangerousNeighbour.y);
         }
 
-        // number of neighbouring tornado cells
         int nTornadoes = Character.getNumericValue(cell.getHint());
-        // number of neighbouring cells that are unknown
-        int nUnknowns = unknownCells.size();
-        // number of neihbouring cells marked as dangers i.e. flagged
-        int nMarked = getTheNumberOfDangers(cell);
+        int nUnknowns = unknowns.size();
+        int nDangers = getTheNumberOfDangers(cell);
 
-        // get all the permutations, to be used when adding the negation
-        ArrayList<ArrayList<String>> permutedClauses = listPermutations(literals);
-        for (int i = 0; i < permutedClauses.size(); i++) {
-            ArrayList<String> currentClause = permutedClauses.get(i);
-            // nUnknowns - nTornados - nMarked is the number of free/safe cells around cell
-            // used to get all possible scenarios
-            for (int j = 0; j < nUnknowns - nTornadoes - nMarked; j++) {
-                String clause = currentClause.get(j);
-                currentClause.remove(clause);
+        // Get permutations
+        ArrayList<ArrayList<String>> permutedClauses = getPermutations(literals);
+        for (ArrayList<String> permutedClause : permutedClauses) {
+            for (int j = 0; j < nUnknowns - nTornadoes - nDangers; j++) {
+                String clause = permutedClause.get(j);
+                permutedClause.remove(clause);
                 clause = "~" + clause;
-                currentClause.add(0, clause);
+                permutedClause.add(0, clause);
             }
         }
 
-        // build the logical formula string
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < permutedClauses.size(); i++) {
-            ArrayList<String> currentClause = permutedClauses.get(i);
-            stringBuilder.append("(");
-            for (int j = 0; j < currentClause.size(); j++) {
-                String clause = currentClause.get(j);
-                stringBuilder.append(clause);
-                stringBuilder.append("&");
+        // Build a logical formula
+        StringBuilder builder = new StringBuilder();
+        for (ArrayList<String> permutedClause : permutedClauses) {
+            builder.append("(");
+            for (int j = 0; j < permutedClause.size(); j++) {
+                String clause = permutedClause.get(j);
+                builder.append(clause);
+                builder.append("&");
             }
-            // delete trailing &
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            stringBuilder.append(")");
-            stringBuilder.append("|");
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append(")");
+            builder.append("|");
         }
 
-        // delete trailing |
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        return stringBuilder.toString();
-
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     /**
-     * Method which taked all uncoveredCells as a parameter, and created a logical formula with all the possibilities
-     * of where tornados could possibly be.
+     * Build a logical formulas
      *
-     * @param uncoveredCells cells that have been uncovered i.e. probed
-     * @return a String representation of the knowledge base.
+     * @return kb (String)
      */
-    public String convertKB(ArrayList<Cell> uncoveredCells) {
+    public String buildKB() {
 
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < uncoveredCells.size(); i++) {
             Cell cell = uncoveredCells.get(i);
             if (getTheNumberOfUnknown(cell) > 0) {
-                // for each cell, get a single clause
-                String clause = createClause(cell);
+                String clause = buildClause(cell);
                 if (clause != "") {
-                    stringBuilder.append("(");
-                    stringBuilder.append(clause);
-                    stringBuilder.append(")");
-                    stringBuilder.append("&");
+                    builder.append("(");
+                    builder.append(clause);
+                    builder.append(")");
+                    builder.append("&");
                 }
             }
         }
-        if (stringBuilder.length() > 0) {
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        if (builder.length() > 0) {
+            builder.deleteCharAt(builder.length() - 1);
         }
 
-        return stringBuilder.toString();
+        return builder.toString();
     }
 
 
@@ -529,7 +506,7 @@ public class Agent {
         boolean isSatisfiable = false;
         try {
             // Build KB based on the uncoveredCells
-            String kbString = convertKB(uncoveredCells);
+            String kbString = buildKB();
             DIMACSGenerator dimacsGenerator = new DIMACSGenerator();
             // Convert the KB into a logical formula
             Formula formula = p.parse(kbString);
