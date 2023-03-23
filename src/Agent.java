@@ -123,11 +123,11 @@ public class Agent {
      * Prove top-left and center
      */
     public void proveHintCells() {
-        Cell cell = findCell(0, 0);
-        probeCell(cell);
+        Cell cell = getCell(0, 0);
+        proveCell(cell);
         if (!this.type.equals("P1")) {
-            cell = findCell(boardLength / 2, boardLength / 2);
-            probeCell(cell);
+            cell = getCell(boardLength / 2, boardLength / 2);
+            proveCell(cell);
         }
     }
 
@@ -154,42 +154,32 @@ public class Agent {
      * @param y
      * @return cell with coordinates x and y
      */
-    public Cell findCell(int x, int y) {
-        for (int i = 0; i < cells.size(); i++) {
-            if (cells.get(i).x == x && cells.get(i).y == y) {
-                return cells.get(i);
+    public Cell getCell(int x, int y) {
+        for (Cell cell: cells) {
+            if (cell.x == x && cell.y == y) {
+                return cell;
             }
         }
         return null;
     }
 
     /**
-     * Method which uncovers cell passed as a parameter. It gets the information about the Cell at that position from
-     * the game instance. It updates the lists and prints out the appropriate message.
+     * Uncovers cell, updates the lists, and prints out the board
      *
      * @param cell
      */
-    public void probeCell(Cell cell) {
-        Cell myCell = findCell(cell.x, cell.y);
-        Cell perceivedCell = game.uncoverCell(cell.x, cell.y ,this.type);
-        cell.setHint(perceivedCell.getHint(), this.type);
-        myCell.setHint(perceivedCell.getHint(), this.type);
+    public void proveCell(Cell cell) {
+        Cell targetCell = getCell(cell.x, cell.y);
+        Cell uncoveredCell = game.uncoverCell(cell.x, cell.y, this.type);
+        cell.setHint(uncoveredCell.getHint(), this.type);
+        targetCell.setHint(uncoveredCell.getHint(), this.type);
         unprovedCells.remove(cell);
         provedCells.add(cell);
         uncoveredCells.add(cell);
         board[cell.y][cell.x] = cell.getHint();
-        if (cell.getHint() == 't') {
-//            System.out.println("tornado " + cell.toString());
-        }
-        // if the hint is 0, increment free neighbours. Tells program that there are free neighbours to be probed
-        else if (cell.getHint() == '0') {
+        if (cell.getHint() == '0') {
             cellsWithFreeNeighbours++;
-//            System.out.println("probe " + cell.toString());
-
-        } else {
-//            System.out.println("probe " + cell.toString());
         }
-        //System.out.println();
     }
 
     /**
@@ -198,7 +188,7 @@ public class Agent {
      * @param cell to be marked as a 'danger'.
      */
     public void markCell(Cell cell) {
-        Cell myCell = findCell(cell.x, cell.y);
+        Cell myCell = getCell(cell.x, cell.y);
         cell.setHint('*', this.type);
         myCell.setHint('*', this.type);
         tornadoCells.add(cell);
@@ -237,42 +227,42 @@ public class Agent {
         // cell over and to the left
         if (cell.x > 0 && cell.y > 0) {
             // check if already probed
-            Cell adjacentCell = findCell(cell.x - 1, cell.y - 1);
+            Cell adjacentCell = getCell(cell.x - 1, cell.y - 1);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
         }
         // cell to the left
         if (cell.x > 0) {
-            Cell adjacentCell = findCell(cell.x - 1, cell.y);
+            Cell adjacentCell = getCell(cell.x - 1, cell.y);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
         }
         // cell over
         if (cell.y > 0) {
-            Cell adjacentCell = findCell(cell.x, cell.y - 1);
+            Cell adjacentCell = getCell(cell.x, cell.y - 1);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
         }
         // cell under and to the right
         if (cell.x < boardLength - 1 && cell.y < boardLength - 1) {
-            Cell adjacentCell = findCell(cell.x + 1, cell.y + 1);
+            Cell adjacentCell = getCell(cell.x + 1, cell.y + 1);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
         }
         // cell to the right
         if (cell.x < boardLength - 1) {
-            Cell adjacentCell = findCell(cell.x + 1, cell.y);
+            Cell adjacentCell = getCell(cell.x + 1, cell.y);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
         }
         // cell under
         if (cell.y < boardLength - 1) {
-            Cell adjacentCell = findCell(cell.x, cell.y + 1);
+            Cell adjacentCell = getCell(cell.x, cell.y + 1);
             if (adjacentCell != null) {
                 adjacentCells.add(adjacentCell);
             }
@@ -330,7 +320,7 @@ public class Agent {
             }
             for (Cell adjacentCell : adjacentCells) {
                 if (!hasBeenExamined(adjacentCell)) {
-                    probeCell(adjacentCell);
+                    proveCell(adjacentCell);
                 }
             }
             cellsWithFreeNeighbours--;
@@ -437,7 +427,7 @@ public class Agent {
             game.setGameOver(true);
         } else if (action == "P") {
             //System.out.println("AFN found, probing");
-            probeCell(myCell);
+            proveCell(myCell);
         } else {
             //System.out.println("AMN found, marking");
             markCell(myCell);
@@ -598,7 +588,7 @@ public class Agent {
                 }
             }
             if (action == "P") {
-                probeCell(myCell);
+                proveCell(myCell);
             } else if (action == "R") {
 //                System.out.println("SAT could not determine, going Random");
 //                makeRandomMove();
@@ -648,7 +638,7 @@ public class Agent {
                 if (this.verbose) {
                     A3main.printBoard(board);
                 }
-                probeCell(unprovedCells.get(0));
+                proveCell(unprovedCells.get(0));
             }
         }
         System.out.println("Final map");
