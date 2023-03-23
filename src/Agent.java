@@ -356,24 +356,6 @@ public class Agent {
         }
     }
 
-
-    /** -------------------------------------------- RPX METHODS ------------------------------------------------**/
-
-
-    /**
-     * Method which randomly picks an unprobed cell to probe next. Used by the RPX method
-     */
-    public void makeRandomMove() {
-        Random rand = new Random();
-        Cell cell = unexaminedCells.get(rand.nextInt(unexaminedCells.size()));
-        probeCell(cell);
-    }
-
-    public void makeMove() {
-        Cell cell = unexaminedCells.get(0);
-        probeCell(cell);
-    }
-
     /** -------------------------------------------- SPX METHODS ------------------------------------------------**/
 
     /**
@@ -657,7 +639,7 @@ public class Agent {
                 if (A3main.getVerbose()) {
                     board.printBoard();
                 }
-                makeMove();
+                probeCell(unexaminedCells.get(0));
             }
         }
         System.out.println("Final map");
