@@ -14,7 +14,7 @@ public class Agent {
 
     private Game game;
     // Agent's board. which is distinct from the game's one
-    private Board board;
+    private char[][] board;
     // Cells on the board
     private ArrayList<Cell> cells;
     // Unproved cells on the board
@@ -39,8 +39,8 @@ public class Agent {
      */
     public Agent(Game game) {
         this.game = game;
-        this.boardLength = this.game.getBoard().board.length;
-        this.board = new Board(new char[boardLength][boardLength]);
+        this.boardLength = this.game.getBoard().length;
+        this.board = new char[boardLength][boardLength];
         this.cells = new ArrayList<>();
         this.unprovedCells = new ArrayList<>();
         this.provedCells = new ArrayList<>();
@@ -94,11 +94,11 @@ public class Agent {
         // Set '?' at first
         for (int i = 0; i < boardLength; i++) {
             for (int j = 0; j < boardLength; j++) {
-                board.board[j][i] = '?';
+                board[j][i] = '?';
             }
         }
         if (A3main.getVerbose()) {
-            board.printBoard();
+            A3main.printBoard(board);
         }
     }
 
@@ -173,7 +173,7 @@ public class Agent {
         unprovedCells.remove(cell);
         provedCells.add(cell);
         uncoveredCells.add(cell);
-        board.board[cell.y][cell.x] = cell.getHint();
+        board[cell.y][cell.x] = cell.getHint();
         if (cell.getHint() == 't') {
 //            System.out.println("tornado " + cell.toString());
         }
@@ -200,7 +200,7 @@ public class Agent {
         tornadoCells.add(cell);
         provedCells.add(cell);
         unprovedCells.remove(cell);
-        board.board[cell.y][cell.x] = cell.getHint();
+        board[cell.y][cell.x] = cell.getHint();
 //        System.out.println("mark " + cell.toString());
 //        System.out.println();
     }
@@ -619,13 +619,13 @@ public class Agent {
             uncoverNeighbours();
             if (!game.isGameWon()) {
                 if (A3main.getVerbose()) {
-                    board.printBoard();
+                    A3main.printBoard(board);
                 }
                 probeCell(unprovedCells.get(0));
             }
         }
         System.out.println("Final map");
-        board.printBoard();
+        A3main.printBoard(board);
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
         } else {
@@ -642,7 +642,7 @@ public class Agent {
             makeSPXMove();
         }
         System.out.println("Final map");
-        board.printBoard();
+        A3main.printBoard(board);
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
         } else if (game.isGameOver()) {
@@ -672,7 +672,7 @@ public class Agent {
             }
         }
         System.out.println("Final map");
-        board.printBoard();
+        A3main.printBoard(board);
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
         } else if (game.isGameOver()) {
@@ -702,7 +702,7 @@ public class Agent {
             }
         }
         System.out.println("Final map");
-        board.printBoard();
+        A3main.printBoard(board);
         if (game.isGameWon()) {
             System.out.println("Result: Agent alive: all solved");
         } else if (game.isGameOver()) {

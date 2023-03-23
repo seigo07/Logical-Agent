@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Game {
 
-    private Board board;
+    private char[][] board;
     // list holding all of the Cell objects
     private ArrayList<Cell> allCells;
     // list holding the cells which have not been uncovered yet
@@ -17,7 +17,7 @@ public class Game {
      * @param worldMap name of the world e.g. S1, M3, L5 etc.
      */
     public Game(char[][] worldMap) {
-        this.board = new Board(worldMap);
+        this.board = worldMap;
         this.gameOver = false;
         this.gameWon = false;
         this.allCells = new ArrayList<>();
@@ -29,9 +29,9 @@ public class Game {
      * Method which populates the allCells and coveredCells array. In the beginning all the cells are covered.
      */
     private void populateCells() {
-        for (int i = 0; i < board.board.length ; i++) {
-            for (int j = 0; j < board.board.length ; j++) {
-                Cell cell = new Cell(i, j, board.board[j][i]);
+        for (int i = 0; i < board.length ; i++) {
+            for (int j = 0; j < board.length ; j++) {
+                Cell cell = new Cell(i, j, board[j][i]);
                 allCells.add(cell);
                 coveredCells.add(cell);
             }
@@ -81,7 +81,7 @@ public class Game {
             for (int i = 0; i < coveredCells.size(); i++) {
                 Cell cell = coveredCells.get(i);
                 // if at least one covered cell is not a tornado it means game has not been won
-                if (board.board[cell.y][cell.x] != 't') {
+                if (board[cell.y][cell.x] != 't') {
                     return false;
                 }
             }
@@ -93,7 +93,7 @@ public class Game {
      * Simple getter
      * @return board
      */
-    public Board getBoard() {
+    public char[][] getBoard() {
         return board;
     }
 
