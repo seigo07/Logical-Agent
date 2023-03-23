@@ -155,7 +155,7 @@ public class Agent {
      * @return cell with coordinates x and y
      */
     public Cell getCell(int x, int y) {
-        for (Cell cell: cells) {
+        for (Cell cell : cells) {
             if (cell.x == x && cell.y == y) {
                 return cell;
             }
@@ -183,20 +183,18 @@ public class Agent {
     }
 
     /**
-     * Method which marks the Cell objects passed as a parameter as a danger cell i.e. flag it. Used by the SPX agent.
+     * Set hint as a danger
      *
-     * @param cell to be marked as a 'danger'.
+     * @param cell which is dangerous
      */
-    public void markCell(Cell cell) {
-        Cell myCell = getCell(cell.x, cell.y);
+    public void setDanger(Cell cell) {
+        Cell targetCell = getCell(cell.x, cell.y);
         cell.setHint('*', this.type);
-        myCell.setHint('*', this.type);
+        targetCell.setHint('*', this.type);
         tornadoCells.add(cell);
         provedCells.add(cell);
         unprovedCells.remove(cell);
         board[cell.y][cell.x] = cell.getHint();
-//        System.out.println("mark " + cell.toString());
-//        System.out.println();
     }
 
     /**
@@ -215,60 +213,53 @@ public class Agent {
     }
 
     /**
-     * Method which returns all the neighbouring cells of a cell passed as a parameter
+     * Return neighbouring cells
      *
-     * @param cell whose neighbours are to be found
-     * @return an ArrayList containing the neighbours of the parameter Cell object.
+     * @param cell
+     * @return neighbouring cells
      */
-    public ArrayList<Cell> getAllNeighbours(Cell cell) {
-        ArrayList<Cell> adjacentCells = new ArrayList<>();
+    public ArrayList<Cell> getNeighbours(Cell cell) {
 
+        ArrayList<Cell> neighbours = new ArrayList<>();
 
-        // cell over and to the left
         if (cell.x > 0 && cell.y > 0) {
-            // check if already probed
-            Cell adjacentCell = getCell(cell.x - 1, cell.y - 1);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x - 1, cell.y - 1);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
-        // cell to the left
         if (cell.x > 0) {
-            Cell adjacentCell = getCell(cell.x - 1, cell.y);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x - 1, cell.y);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
-        // cell over
         if (cell.y > 0) {
-            Cell adjacentCell = getCell(cell.x, cell.y - 1);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x, cell.y - 1);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
-        // cell under and to the right
         if (cell.x < boardLength - 1 && cell.y < boardLength - 1) {
-            Cell adjacentCell = getCell(cell.x + 1, cell.y + 1);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x + 1, cell.y + 1);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
-        // cell to the right
         if (cell.x < boardLength - 1) {
-            Cell adjacentCell = getCell(cell.x + 1, cell.y);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x + 1, cell.y);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
-        // cell under
         if (cell.y < boardLength - 1) {
-            Cell adjacentCell = getCell(cell.x, cell.y + 1);
-            if (adjacentCell != null) {
-                adjacentCells.add(adjacentCell);
+            Cell neighbourCell = getCell(cell.x, cell.y + 1);
+            if (neighbourCell != null) {
+                neighbours.add(neighbourCell);
             }
         }
 
-        return adjacentCells;
+        return neighbours;
     }
 
     /**
@@ -327,20 +318,17 @@ public class Agent {
         }
     }
 
-    /** -------------------------------------------- SPX METHODS ------------------------------------------------**/
-
     /**
-     * Method which returns the number of flagged cells around the cell passed as a parameter
+     * Return the number of dangered
      *
      * @param cell
-     * @return integer value of number of flagged cells around the cell passed as a parameter
+     * @return the number of dangered around the passed cell
      */
-    @SuppressWarnings("Duplicates")
-    public int neighbouringDangers(Cell cell) {
+    public int getTheNumberOfDangers(Cell cell) {
         int nDangers = 0;
-        ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
-        for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() == '*') {
+        ArrayList<Cell> neighbours = getNeighbours(cell);
+        for (Cell neighbour : neighbours) {
+            if (neighbour.getHint() == '*') {
                 nDangers++;
             }
         }
@@ -348,16 +336,16 @@ public class Agent {
     }
 
     /**
-     * Method which returns the number of unexamined cells around the cell passed as a parameter
+     * Return the number of unproved cells
      *
      * @param cell
-     * @returni nteger value of number of unexamined cells around the cell passed as a parameter
+     * @return the number of unproved cells
      */
-    public int neighbouringUnknowns(Cell cell) {
+    public int getTheNumberOfUnknown(Cell cell) {
         int nUnknowns = 0;
-        ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
-        for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() == '?') {
+        ArrayList<Cell> neighbours = getNeighbours(cell);
+        for (Cell neighbour : neighbours) {
+            if (neighbour.getHint() == '?') {
                 nUnknowns++;
             }
         }
@@ -365,17 +353,16 @@ public class Agent {
     }
 
     /**
-     * Method which checks whether the Cell object passed as a parameter is in an AFN situation.
+     * Check whether the cell is in an AFN situation.
      *
      * @param cell
      * @return true if the cell is in an AFN situation
      */
-    public boolean checkAFN(Cell cell) {
-        ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
-        for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != '*') {
-                // AFN situation is true if the number of flagged cells around cell equals hint
-                if (neighbouringDangers(adjacentCell) == Character.getNumericValue(adjacentCell.getHint())) {
+    public boolean isAFN(Cell cell) {
+        ArrayList<Cell> neighbours = getNeighbours(cell);
+        for (Cell neighbour : neighbours) {
+            if (neighbour.getHint() != '?' && neighbour.getHint() != '*') {
+                if (getTheNumberOfDangers(neighbour) == Character.getNumericValue(neighbour.getHint())) {
                     return true;
                 }
             }
@@ -384,17 +371,16 @@ public class Agent {
     }
 
     /**
-     * Method which checks whether the Cell object passed as a parameter is in an AMN situation
+     * Check whether the cell is in an AMN situation
      *
      * @param cell
      * @return true if the cells is in an AMN situation
      */
-    public boolean checkAMN(Cell cell) {
-        ArrayList<Cell> adjacentCells = getAllNeighbours(cell);
-        for (Cell adjacentCell : adjacentCells) {
-            if (adjacentCell.getHint() != '?' && adjacentCell.getHint() != '*') {
-                // AMD situation is true if the number of unexamined cells around cell equals hint minus flagged cells
-                if (neighbouringUnknowns(adjacentCell) == (Character.getNumericValue(adjacentCell.getHint() - neighbouringDangers(adjacentCell)))) {
+    public boolean isAMN(Cell cell) {
+        ArrayList<Cell> neighbours = getNeighbours(cell);
+        for (Cell neighbour : neighbours) {
+            if (neighbour.getHint() != '?' && neighbour.getHint() != '*') {
+                if (getTheNumberOfUnknown(neighbour) == (Character.getNumericValue(neighbour.getHint() - getTheNumberOfDangers(neighbour)))) {
                     return true;
                 }
             }
@@ -403,34 +389,24 @@ public class Agent {
     }
 
     /**
-     * Method which picks a cell based on the single point strategy
+     * Method for single point strategy
      */
-    public void makeSPXMove() {
-        Cell myCell = null;
-        String action = "R";
-        // iterate all unprobed cell to find situations of AFN or AMN
+    public void SPS() {
+        // Check AFN or AMN
+        boolean isAFNorAMN = false;
         for (Cell cell : unprovedCells) {
-            if (checkAFN(cell)) {
-                action = "P";
-                myCell = cell;
+            if (isAFN(cell)) {
+                isAFNorAMN = true;
+                proveCell(cell);
                 break;
-            } else if (checkAMN(cell)) {
-                action = "M";
-                myCell = cell;
+            } else if (isAMN(cell)) {
+                isAFNorAMN = true;
+                setDanger(cell);
                 break;
             }
         }
-        // if no unexamined cell is in an AMN or AFN situation, make random move.
-        if (action == "R") {
-//            System.out.println("No SPX, going random.");
-//            makeRandomMove();
+        if (!isAFNorAMN) {
             game.setGameOver(true);
-        } else if (action == "P") {
-            //System.out.println("AFN found, probing");
-            proveCell(myCell);
-        } else {
-            //System.out.println("AMN found, marking");
-            markCell(myCell);
         }
     }
 
@@ -447,7 +423,7 @@ public class Agent {
     public String createClause(Cell cell) {
 
         // get all the neighbours of the cell
-        ArrayList<Cell> neighbours = getAllNeighbours(cell);
+        ArrayList<Cell> neighbours = getNeighbours(cell);
         // contains unknown neighbours of parameter cell
         ArrayList<Cell> unknownCells = new ArrayList<>();
         // contains marked neighbours of parameter cell
@@ -477,7 +453,7 @@ public class Agent {
         // number of neighbouring cells that are unknown
         int nUnknowns = unknownCells.size();
         // number of neihbouring cells marked as dangers i.e. flagged
-        int nMarked = neighbouringDangers(cell);
+        int nMarked = getTheNumberOfDangers(cell);
 
         // get all the permutations, to be used when adding the negation
         ArrayList<ArrayList<String>> permutedClauses = listPermutations(literals);
@@ -527,7 +503,7 @@ public class Agent {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < uncoveredCells.size(); i++) {
             Cell cell = uncoveredCells.get(i);
-            if (neighbouringUnknowns(cell) > 0) {
+            if (getTheNumberOfUnknown(cell) > 0) {
                 // for each cell, get a single clause
                 String clause = createClause(cell);
                 if (clause != "") {
@@ -656,7 +632,7 @@ public class Agent {
     public void playBeginner() {
         while (!game.isGameOver()) {
             uncoverNeighbours();
-            makeSPXMove();
+            SPS();
         }
         System.out.println("Final map");
         A3main.printBoard(board);
@@ -685,7 +661,7 @@ public class Agent {
                         myCell = cell;
                     }
                 }
-                markCell(myCell);
+                setDanger(myCell);
             }
         }
         System.out.println("Final map");
@@ -715,7 +691,7 @@ public class Agent {
                         myCell = cell;
                     }
                 }
-                markCell(myCell);
+                setDanger(myCell);
             }
         }
         System.out.println("Final map");
