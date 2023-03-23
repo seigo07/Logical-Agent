@@ -507,11 +507,11 @@ public class Agent {
         try {
             // Build KB based on the uncoveredCells
             String kbString = buildKB();
-            DIMACSGenerator dimacsGenerator = new DIMACSGenerator();
+            DIMACS dimacs = new DIMACS();
             // Convert the KB into a logical formula
             Formula formula = p.parse(kbString);
             // Convert a logical formula to a CNF encoding
-            int[][] dimacsClauses = dimacsGenerator.convertToDIMACS(formula);
+            int[][] dimacsClauses = dimacs.buildDIMACS(formula);
             solver = SolverFactory.newDefault();
             solver.newVar(1000);
             solver.setExpectedNumberOfClauses(50000);
@@ -522,8 +522,8 @@ public class Agent {
             // Check the satisfiability of including a tornado
             for (Cell cell : unprovedCells) {
                 String clause = "T" + cell.x + cell.y;
-                if (dimacsGenerator.getLiteralsHashMap().containsKey(clause)) {
-                    int literal = dimacsGenerator.getLiteralsHashMap().get(clause);
+                if (dimacs.getLiterals().containsKey(clause)) {
+                    int literal = dimacs.getLiterals().get(clause);
                     int[] literals = new int[]{literal};
                     if (!solver.isSatisfiable(new VecInt(literals))) {
                         targetCell = cell;
