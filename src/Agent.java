@@ -523,62 +523,53 @@ public class Agent {
 
 
     /**
-     * Method which carries out the SAT move strategy. It calls the methods required to turn the knowledge base into
-     * a logical formula string, then calls the methods that encode this into CNF DIMACS and then uses the SAT4J solver
-     * to assess whether a Cell is safe to be probed.
+     * Method for SAT move strategy.
      */
-    public boolean makeSATMove() {
+    public void SATWithCNF() {
 
         ISolver solver;
-        Cell myCell = null;
-        String action = "R";
+        Cell targetCell = null;
+        boolean isSatisfiable = false;
         try {
-            // Create the KB from the probed Cells
+            // Build KB based on the uncoveredCells
             String kbString = convertKB(uncoveredCells);
             DIMACSGenerator dimacsGenerator = new DIMACSGenerator();
-            // parse the String representing the knowledge base into a logical formula
+            // Convert the KB into a logical formula
             Formula formula = p.parse(kbString);
-            // convert the formula to a CNF DIMACS encoding
+            // Convert a logical formula to a CNF encoding
             int[][] dimacsClauses = dimacsGenerator.convertToDIMACS(formula);
-            // instantiate the solver
             solver = SolverFactory.newDefault();
             solver.newVar(1000);
             solver.setExpectedNumberOfClauses(50000);
             for (int j = 0; j < dimacsClauses.length; j++) {
                 VecInt vecInt = new VecInt(dimacsClauses[j]);
-                // add clause to solved
                 solver.addClause(vecInt);
             }
-            // for every unexamined cells check whether the possibility of it containing a tornado is satisfiable.
-            // if not then it means that the cell can be probed safely.
+            // Check the satisfiability of including a tornado
             for (Cell cell : unprovedCells) {
-                String clause = "T" + Integer.toString(cell.x) + Integer.toString(cell.y);
+                String clause = "T" + cell.x + cell.y;
                 if (dimacsGenerator.getLiteralsHashMap().containsKey(clause)) {
                     int literal = dimacsGenerator.getLiteralsHashMap().get(clause);
-                    int[] literalArray = new int[]{literal};
-                    if (!solver.isSatisfiable(new VecInt(literalArray))) {
-                        myCell = cell;
-                        action = "P";
+                    int[] literals = new int[]{literal};
+                    if (!solver.isSatisfiable(new VecInt(literals))) {
+                        targetCell = cell;
+                        isSatisfiable = true;
                         break;
                     }
                 }
             }
-            if (action == "P") {
-                proveCell(myCell);
-            } else if (action == "R") {
-//                System.out.println("SAT could not determine, going Random");
-//                makeRandomMove();
+            if (isSatisfiable) {
+                proveCell(targetCell);
+            } else {
                 game.setGameOver(true);
             }
         } catch (ParserException e) {
-//            System.out.println("Parser Exception: " + e.getMessage());
+            System.out.println("ParserException: " + e.getMessage());
         } catch (ContradictionException e) {
-//            System.out.println("Contradiction Exception: " + e.getMessage());
+            System.out.println("ContradictionException: " + e.getMessage());
         } catch (TimeoutException e) {
-//            System.out.println("Exception: " + e.getMessage());
+            System.out.println("TimeoutException: " + e.getMessage());
         }
-
-        return true;
     }
 
     /**
@@ -651,7 +642,7 @@ public class Agent {
     public void playIntermediateDNF() {
         while (!game.isGameOver()) {
             uncoverNeighbours();
-            makeSATMove();
+            SATWithCNF();
         }
         if (game.isGameWon()) {
             while (unprovedCells.size() > 0) {
@@ -681,7 +672,7 @@ public class Agent {
     public void playIntermediateCNF() {
         while (!game.isGameOver()) {
             uncoverNeighbours();
-            makeSATMove();
+            SATWithCNF();
         }
         if (game.isGameWon()) {
             while (unprovedCells.size() > 0) {
