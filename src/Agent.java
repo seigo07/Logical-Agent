@@ -128,28 +128,27 @@ public class Agent {
     }
 
     /**
-     * Method which returns the Cell object from the unexaminedCells list with coordinates passed as parameters
+     * Return the cell from the unprovedCells with coordinates
      *
-     * @param x coordinate
-     * @param y coordinate
-     * @return Cell object at coordinates x and y
+     * @param x
+     * @param y
+     * @return unprovedCell with coordinates x and y
      */
-    public Cell findUnexaminedCell(int x, int y) {
+    public Cell findUnprovedCell(int x, int y) {
         for (int i = 0; i < unprovedCells.size(); i++) {
             if (unprovedCells.get(i).x == x && unprovedCells.get(i).y == y) {
                 return unprovedCells.get(i);
             }
         }
-        // if cell has been examined before
         return null;
     }
 
     /**
-     * Method which returns the Cell object from the allCells list with coordinates passed as parameters
+     * Return the cell from the cells with coordinates
      *
-     * @param x coordinate
-     * @param y coordinate
-     * @return Cell object at coordinates x and y
+     * @param x
+     * @param y
+     * @return cell with coordinates x and y
      */
     public Cell findCell(int x, int y) {
         for (int i = 0; i < cells.size(); i++) {
@@ -157,7 +156,6 @@ public class Agent {
                 return cells.get(i);
             }
         }
-        // if cell does not exist
         return null;
     }
 
@@ -280,71 +278,57 @@ public class Agent {
     }
 
     /**
-     * Method which uncovers all neighbours of a cell with hint 0 i.e. no tornadoes around it
+     * Uncovers neighbours whose hint is 0 with no tornadoes around them
      */
-    @SuppressWarnings("Duplicates")
-    public void uncoverAllClearNeighbours() {
-        // list holding cells that are adjacent to a cell with hint 0. These cells can be probed
-        ArrayList<Cell> adjacentCells = new ArrayList<>();
-        for (Cell cell : provedCells) {
-            if (cell.getHint() == '0') {
-                if (cell.x > 0 && cell.y > 0) {
-                    // check if already probed
-                    Cell adjacentCell = findUnexaminedCell(cell.x - 1, cell.y - 1);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-                if (cell.x > 0) {
-                    Cell adjacentCell = findUnexaminedCell(cell.x - 1, cell.y);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-                if (cell.y > 0) {
-                    Cell adjacentCell = findUnexaminedCell(cell.x, cell.y - 1);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-                if (cell.x < boardLength - 1 && cell.y < boardLength - 1) {
-                    Cell adjacentCell = findUnexaminedCell(cell.x + 1, cell.y + 1);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-                if (cell.x < boardLength - 1) {
-                    Cell adjacentCell = findUnexaminedCell(cell.x + 1, cell.y);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-                if (cell.y < boardLength - 1) {
-                    Cell adjacentCell = findUnexaminedCell(cell.x, cell.y + 1);
-                    if (adjacentCell != null) {
-                        adjacentCells.add(adjacentCell);
-                    }
-                }
-
-            }
-        }
-        // probe all the cells in the probe cell list. Done outside the loop to prevent ConcurrentModificationException
-        for (Cell adjacentCell : adjacentCells) {
-            if (!hasBeenExamined(adjacentCell)) {
-//                System.out.println("Uncovering free neighbour");
-                probeCell(adjacentCell);
-            }
-        }
-    }
-
-    /**
-     * Method which calls the uncoverAllClearNeighbours method.
-     * Decrements the freeNeighbours variable.
-     */
-    @SuppressWarnings("Duplicates")
-    public void clearNeighbours() {
+    public void uncoverNeighbours() {
         while (cellsWithFreeNeighbours != 0 && !game.isGameWon()) {
-            uncoverAllClearNeighbours();
+            ArrayList<Cell> adjacentCells = new ArrayList<>();
+            for (Cell cell : provedCells) {
+                if (cell.getHint() == '0') {
+                    if (cell.x > 0 && cell.y > 0) {
+                        Cell adjacentCell = findUnprovedCell(cell.x - 1, cell.y - 1);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+                    if (cell.x > 0) {
+                        Cell adjacentCell = findUnprovedCell(cell.x - 1, cell.y);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+                    if (cell.y > 0) {
+                        Cell adjacentCell = findUnprovedCell(cell.x, cell.y - 1);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+                    if (cell.x < boardLength - 1 && cell.y < boardLength - 1) {
+                        Cell adjacentCell = findUnprovedCell(cell.x + 1, cell.y + 1);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+                    if (cell.x < boardLength - 1) {
+                        Cell adjacentCell = findUnprovedCell(cell.x + 1, cell.y);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+                    if (cell.y < boardLength - 1) {
+                        Cell adjacentCell = findUnprovedCell(cell.x, cell.y + 1);
+                        if (adjacentCell != null) {
+                            adjacentCells.add(adjacentCell);
+                        }
+                    }
+
+                }
+            }
+            for (Cell adjacentCell : adjacentCells) {
+                if (!hasBeenExamined(adjacentCell)) {
+                    probeCell(adjacentCell);
+                }
+            }
             cellsWithFreeNeighbours--;
         }
     }
@@ -632,7 +616,7 @@ public class Agent {
      */
     public void playBasic() {
         while (!game.isGameOver()) {
-            clearNeighbours();
+            uncoverNeighbours();
             if (!game.isGameWon()) {
                 if (A3main.getVerbose()) {
                     board.printBoard();
@@ -654,7 +638,7 @@ public class Agent {
      */
     public void playBeginner() {
         while (!game.isGameOver()) {
-            clearNeighbours();
+            uncoverNeighbours();
             makeSPXMove();
         }
         System.out.println("Final map");
@@ -673,7 +657,7 @@ public class Agent {
      */
     public void playIntermediateDNF() {
         while (!game.isGameOver()) {
-            clearNeighbours();
+            uncoverNeighbours();
             makeSATMove();
         }
         if (game.isGameWon()) {
@@ -703,7 +687,7 @@ public class Agent {
      */
     public void playIntermediateCNF() {
         while (!game.isGameOver()) {
-            clearNeighbours();
+            uncoverNeighbours();
             makeSATMove();
         }
         if (game.isGameWon()) {
