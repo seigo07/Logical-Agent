@@ -739,4 +739,23 @@ public class Agent {
             System.out.println("Result: Agent dead: found mine");
         }
     }
+
+    /**
+     * Play Beginner Tornado Sweeper Agent
+     */
+    public void playBeginner() {
+        while (!game.isGameOver()) {
+            clearNeighbours();
+            makeSPXMove();
+        }
+        System.out.println("Final map");
+        board.printBoard();
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
 }
