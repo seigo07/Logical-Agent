@@ -56,9 +56,6 @@ public class Agent {
         proveHintCells();
     }
 
-    /** -------------------------------------------- GENERAL METHODS ------------------------------------------------**/
-
-
     /**
      * Method which creates permutations of strings in a list. Used to generate the encoding of the knowledge base
      * as a string.
@@ -646,13 +643,13 @@ public class Agent {
         }
         if (game.isGameWon()) {
             while (unprovedCells.size() > 0) {
-                Cell myCell = null;
+                Cell targetCell = null;
                 for (Cell cell : unprovedCells) {
                     if (cell.getHint() == '?') {
-                        myCell = cell;
+                        targetCell = cell;
                     }
                 }
-                setDanger(myCell);
+                setDanger(targetCell);
             }
         }
         System.out.println("Final map");
