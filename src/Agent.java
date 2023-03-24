@@ -1,9 +1,12 @@
 import java.util.ArrayList;
 
+import org.logicng.datastructures.Tristate;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Formula;
 import org.logicng.io.parsers.ParserException;
 import org.logicng.io.parsers.PropositionalParser;
+import org.logicng.solvers.MiniSat;
+import org.logicng.solvers.SATSolver;
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
@@ -476,8 +479,7 @@ public class Agent {
     public String buildKB() {
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < uncoveredCells.size(); i++) {
-            Cell cell = uncoveredCells.get(i);
+        for (Cell cell: uncoveredCells) {
             if (getTheNumberOfUnknown(cell) > 0) {
                 String clause = buildClause(cell);
                 if (clause != "") {
@@ -495,9 +497,37 @@ public class Agent {
         return builder.toString();
     }
 
+    /**
+     * Method for SAT with CNF encoding.
+     */
+    public void SATWithDNF() {
+
+        ISolver solver;
+        Cell targetCell = null;
+        boolean isSatisfiable = false;
+        try {
+            // Build KB based on the uncoveredCells
+            String kbString = buildKB();
+            // Convert the KB into a logical formula
+            Formula formula = p.parse(kbString);
+            // Convert a logical formula to a CNF encoding
+            SATSolver miniSat= MiniSat.miniSat(f);
+            miniSat.add(formula);
+            Tristate result = miniSat.sat();
+            System.out.println("hoge: " + result);
+            game.setGameOver(true);
+//            if (isSatisfiable) {
+//                proveCell(targetCell);
+//            } else {
+//                game.setGameOver(true);
+//            }
+        } catch (ParserException e) {
+            System.out.println("ParserException: " + e.getMessage());
+        }
+    }
 
     /**
-     * Method for SAT move strategy.
+     * Method for SAT with CNF encoding.
      */
     public void SATWithCNF() {
 
@@ -616,7 +646,7 @@ public class Agent {
     public void playIntermediateDNF() {
         while (!game.isGameOver()) {
             uncoverNeighbours();
-            SATWithCNF();
+            SATWithDNF();
         }
         if (game.isGameWon()) {
             while (unprovedCells.size() > 0) {
