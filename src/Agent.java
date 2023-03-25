@@ -514,7 +514,7 @@ public class Agent {
             SATSolver miniSat= MiniSat.miniSat(f);
             miniSat.add(formula);
             Tristate result = miniSat.sat();
-            System.out.println("hoge: " + result);
+            System.out.println("result: " + result);
             game.setGameOver(true);
 //            if (isSatisfiable) {
 //                proveCell(targetCell);
@@ -647,7 +647,7 @@ public class Agent {
         game.setSatisfiable(true);
         while (game.isSatisfiable()) {
             uncoverNeighbours();
-            SATWithCNF();
+            SATWithDNF();
         }
         while (unprovedCells.size() > 0 && !game.isGameOver()) {
             uncoverNeighbours();
