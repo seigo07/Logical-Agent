@@ -565,7 +565,7 @@ public class Agent {
             if (isSatisfiable) {
                 proveCell(targetCell);
             } else {
-                game.setGameOver(true);
+                game.setSatisfiable(false);
             }
         } catch (ParserException e) {
             System.out.println("ParserException: " + e.getMessage());
@@ -644,20 +644,14 @@ public class Agent {
      * Play Intermediate Tornado Sweeper Agent with DNF encoding
      */
     public void playIntermediateDNF() {
-        while (!game.isGameOver()) {
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
             uncoverNeighbours();
-            SATWithDNF();
+            SATWithCNF();
         }
-        if (game.isGameWon()) {
-            while (unprovedCells.size() > 0) {
-                Cell targetCell = null;
-                for (Cell cell : unprovedCells) {
-                    if (cell.getHint() == '?') {
-                        targetCell = cell;
-                    }
-                }
-                setDanger(targetCell);
-            }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            uncoverNeighbours();
+            SPS();
         }
         System.out.println("Final map");
         A3main.printBoard(board);
@@ -674,20 +668,14 @@ public class Agent {
      * Play Intermediate Tornado Sweeper Agent with CNF encoding
      */
     public void playIntermediateCNF() {
-        while (!game.isGameOver()) {
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
             uncoverNeighbours();
             SATWithCNF();
         }
-        if (game.isGameWon()) {
-            while (unprovedCells.size() > 0) {
-                Cell myCell = null;
-                for (Cell cell : unprovedCells) {
-                    if (cell.getHint() == '?') {
-                        myCell = cell;
-                    }
-                }
-                setDanger(myCell);
-            }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            uncoverNeighbours();
+            SPS();
         }
         System.out.println("Final map");
         A3main.printBoard(board);
