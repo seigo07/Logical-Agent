@@ -498,7 +498,7 @@ public class Agent {
     }
 
     /**
-     * Method for SAT with CNF encoding.
+     * Method for SAT with DNF encoding.
      */
     public void SATWithDNF() {
 
