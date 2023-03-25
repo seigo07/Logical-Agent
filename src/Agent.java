@@ -502,25 +502,30 @@ public class Agent {
      */
     public void SATWithDNF() {
 
-        ISolver solver;
         Cell targetCell = null;
         boolean isSatisfiable = false;
         try {
             // Build KB based on the uncoveredCells
             String kbString = buildKB();
             // Convert the KB into a logical formula
-            Formula formula = p.parse(kbString);
-            // Convert a logical formula to a CNF encoding
-            SATSolver miniSat= MiniSat.miniSat(f);
-            miniSat.add(formula);
-            Tristate result = miniSat.sat();
-            System.out.println("result: " + result);
-            game.setGameOver(true);
-//            if (isSatisfiable) {
-//                proveCell(targetCell);
-//            } else {
-//                game.setGameOver(true);
-//            }
+            for (Cell cell : unprovedCells) {
+                String clause = "&T" + cell.x + cell.y;
+                Formula formula = p.parse(kbString+clause);
+                // Convert a logical formula to a CNF encoding
+                SATSolver miniSat= MiniSat.miniSat(f);
+                miniSat.add(formula);
+                Tristate result = miniSat.sat();
+                if (result.toString().equals("FALSE")) {
+                    targetCell = cell;
+                    isSatisfiable = true;
+                    break;
+                }
+            }
+            if (isSatisfiable) {
+                proveCell(targetCell);
+            } else {
+                game.setSatisfiable(false);
+            }
         } catch (ParserException e) {
             System.out.println("ParserException: " + e.getMessage());
         }
