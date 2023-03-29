@@ -37,6 +37,7 @@ public class Agent {
     private int cellsWithFreeNeighbours;
     private FormulaFactory f = new FormulaFactory();
     private PropositionalParser p = new PropositionalParser(f);
+    private int counter;
 
     /**
      * Constructor
@@ -394,10 +395,12 @@ public class Agent {
         boolean isAFNorAMN = false;
         for (Cell cell : unprovedCells) {
             if (isAFN(cell)) {
+                counter++;
                 isAFNorAMN = true;
                 proveCell(cell);
                 break;
             } else if (isAMN(cell)) {
+                counter++;
                 isAFNorAMN = true;
                 setDanger(cell);
                 break;
@@ -569,6 +572,7 @@ public class Agent {
                 }
             }
             if (isSatisfiable) {
+                counter++;
                 proveCell(targetCell);
             } else {
                 game.setSatisfiable(false);
@@ -635,6 +639,7 @@ public class Agent {
             uncoverNeighbours();
             SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -659,6 +664,7 @@ public class Agent {
             uncoverNeighbours();
             SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -683,6 +689,7 @@ public class Agent {
             uncoverNeighbours();
             SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -701,9 +708,6 @@ public class Agent {
         while (!game.isGameOver()) {
             uncoverNeighbours();
             if (!game.isGameWon()) {
-//                if (this.verbose) {
-//                    A3main.printBoard(board);
-//                }
                 RP();
             }
         }
