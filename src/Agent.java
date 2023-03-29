@@ -784,7 +784,7 @@ public class Agent {
         while (unprovedCells.size() > 0 && !game.isGameOver()) {
             SPS();
         }
-        System.out.println("counter:"+ counter);
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
