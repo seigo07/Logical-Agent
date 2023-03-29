@@ -5,6 +5,7 @@ public class Game {
     private char[][] board;
     private boolean isGameOver;
     private boolean isGameWon;
+    private boolean isSatisfiable;
     // Cells on the board
     private ArrayList<Cell> cells;
     // Covered cells on the board
@@ -48,10 +49,10 @@ public class Game {
         for (Cell cell: cells) {
             if (cell.x == x && cell.y == y) {
                 coveredCells.remove(cell);
-                if (cell.getHint() == 't' && !type.equals("P2")) {
+                if (cell.getHint() == 't' && (type.equals("P1") || type.equals("P5") || type.equals("P6") || type.equals("P7") || type.equals("P8"))) {
                     isGameOver = true;
                 } else if (checkGameWon()) {
-                    if (!type.equals("P2")) {
+                    if (type.equals("P1") || type.equals("P5") || type.equals("P6") || type.equals("P7") || type.equals("P8")) {
                         isGameOver = true;
                     }
                     isGameWon = true;
@@ -109,6 +110,15 @@ public class Game {
     }
 
     /**
+     * Getter
+     *
+     * @return isSatisfiable
+     */
+    public boolean isSatisfiable() {
+        return isSatisfiable;
+    }
+
+    /**
      * Setter
      *
      * @param isGameOver
@@ -117,4 +127,12 @@ public class Game {
         this.isGameOver = isGameOver;
     }
 
+    /**
+     * Setter
+     *
+     * @param isSatisfiable
+     */
+    public void setSatisfiable(boolean isSatisfiable) {
+        this.isSatisfiable = isSatisfiable;
+    }
 }

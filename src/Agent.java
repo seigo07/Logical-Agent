@@ -1,9 +1,13 @@
 import java.util.ArrayList;
+import java.util.Random;
 
+import org.logicng.datastructures.Tristate;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Formula;
 import org.logicng.io.parsers.ParserException;
 import org.logicng.io.parsers.PropositionalParser;
+import org.logicng.solvers.MiniSat;
+import org.logicng.solvers.SATSolver;
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
@@ -33,6 +37,7 @@ public class Agent {
     private int cellsWithFreeNeighbours;
     private FormulaFactory f = new FormulaFactory();
     private PropositionalParser p = new PropositionalParser(f);
+    private int counter;
 
     /**
      * Constructor
@@ -390,10 +395,12 @@ public class Agent {
         boolean isAFNorAMN = false;
         for (Cell cell : unprovedCells) {
             if (isAFN(cell)) {
+                counter++;
                 isAFNorAMN = true;
                 proveCell(cell);
                 break;
             } else if (isAMN(cell)) {
+                counter++;
                 isAFNorAMN = true;
                 setDanger(cell);
                 break;
@@ -476,8 +483,7 @@ public class Agent {
     public String buildKB() {
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < uncoveredCells.size(); i++) {
-            Cell cell = uncoveredCells.get(i);
+        for (Cell cell: uncoveredCells) {
             if (getTheNumberOfUnknown(cell) > 0) {
                 String clause = buildClause(cell);
                 if (clause != "") {
@@ -495,9 +501,42 @@ public class Agent {
         return builder.toString();
     }
 
+    /**
+     * Method for SAT with DNF encoding.
+     */
+    public void SATWithDNF() {
+
+        Cell targetCell = null;
+        boolean isSatisfiable = false;
+        try {
+            // Build KB based on the uncoveredCells
+            String kbString = buildKB();
+            // Convert the KB into a logical formula
+            for (Cell cell : unprovedCells) {
+                String clause = "&T" + cell.x + cell.y;
+                Formula formula = p.parse(kbString+clause);
+                // Convert a logical formula to a CNF encoding
+                SATSolver miniSat= MiniSat.miniSat(f);
+                miniSat.add(formula);
+                Tristate result = miniSat.sat();
+                if (result.toString().equals("FALSE")) {
+                    targetCell = cell;
+                    isSatisfiable = true;
+                    break;
+                }
+            }
+            if (isSatisfiable) {
+                proveCell(targetCell);
+            } else {
+                game.setSatisfiable(false);
+            }
+        } catch (ParserException e) {
+            System.out.println("ParserException: " + e.getMessage());
+        }
+    }
 
     /**
-     * Method for SAT move strategy.
+     * Method for SAT with CNF encoding.
      */
     public void SATWithCNF() {
 
@@ -533,9 +572,10 @@ public class Agent {
                 }
             }
             if (isSatisfiable) {
+                counter++;
                 proveCell(targetCell);
             } else {
-                game.setGameOver(true);
+                game.setSatisfiable(false);
             }
         } catch (ParserException e) {
             System.out.println("ParserException: " + e.getMessage());
@@ -564,7 +604,16 @@ public class Agent {
                 playIntermediateCNF();
                 break;
             case "P5":
-                //TODO: Part 5
+                playRP();
+                break;
+            case "P6":
+                playRPSPS();
+                break;
+            case "P7":
+                playRPSATSDNF();
+                break;
+            case "P8":
+                playRPSATSCNF();
                 break;
         }
     }
@@ -573,8 +622,8 @@ public class Agent {
      * Play Basic Tornado Sweeper Agent
      */
     public void playBasic() {
+        uncoverNeighbours();
         while (!game.isGameOver()) {
-            uncoverNeighbours();
             if (!game.isGameWon()) {
                 if (this.verbose) {
                     A3main.printBoard(board);
@@ -595,10 +644,11 @@ public class Agent {
      * Play Beginner Tornado Sweeper Agent
      */
     public void playBeginner() {
+        uncoverNeighbours();
         while (!game.isGameOver()) {
-            uncoverNeighbours();
             SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -614,21 +664,15 @@ public class Agent {
      * Play Intermediate Tornado Sweeper Agent with DNF encoding
      */
     public void playIntermediateDNF() {
-        while (!game.isGameOver()) {
-            uncoverNeighbours();
-            SATWithCNF();
+        uncoverNeighbours();
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
+            SATWithDNF();
         }
-        if (game.isGameWon()) {
-            while (unprovedCells.size() > 0) {
-                Cell targetCell = null;
-                for (Cell cell : unprovedCells) {
-                    if (cell.getHint() == '?') {
-                        targetCell = cell;
-                    }
-                }
-                setDanger(targetCell);
-            }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -644,21 +688,15 @@ public class Agent {
      * Play Intermediate Tornado Sweeper Agent with CNF encoding
      */
     public void playIntermediateCNF() {
-        while (!game.isGameOver()) {
-            uncoverNeighbours();
+        uncoverNeighbours();
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
             SATWithCNF();
         }
-        if (game.isGameWon()) {
-            while (unprovedCells.size() > 0) {
-                Cell myCell = null;
-                for (Cell cell : unprovedCells) {
-                    if (cell.getHint() == '?') {
-                        myCell = cell;
-                    }
-                }
-                setDanger(myCell);
-            }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            SPS();
         }
+//        System.out.println("counter:"+ counter);
         System.out.println("Final map");
         A3main.printBoard(board);
         if (game.isGameWon()) {
@@ -667,6 +705,221 @@ public class Agent {
             System.out.println("Result: Agent not terminated");
         } else {
             System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Additional Tornado Sweeper Agent with RP strategy
+     */
+    public void playRP() {
+        while (!game.isGameOver()) {
+            uncoverNeighbours();
+            if (!game.isGameWon()) {
+                RP();
+            }
+        }
+//        System.out.println("counter:"+ counter);
+        System.out.println("Final map");
+        A3main.printBoard(board);
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Additional Tornado Sweeper Agent with RP and SPS strategy
+     */
+    public void playRPSPS() {
+        uncoverNeighbours();
+        while (!game.isGameOver()) {
+            RPSPS();
+        }
+//        System.out.println("counter:"+ counter);
+        System.out.println("Final map");
+        A3main.printBoard(board);
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Additional Tornado Sweeper Agent SATS with DNF encoding with RP and SPS strategy
+     */
+    public void playRPSATSDNF() {
+        uncoverNeighbours();
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
+            RPSATWithDNF();
+        }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            SPS();
+        }
+//        System.out.println("counter:"+ counter);
+        System.out.println("Final map");
+        A3main.printBoard(board);
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Play Additional Tornado Sweeper Agent SATS with CNF encoding with RP and SPS strategy
+     */
+    public void playRPSATSCNF() {
+        uncoverNeighbours();
+        game.setSatisfiable(true);
+        while (game.isSatisfiable()) {
+            RPSATWithCNF();
+        }
+        while (unprovedCells.size() > 0 && !game.isGameOver()) {
+            SPS();
+        }
+//        System.out.println("counter:"+ counter);
+        System.out.println("Final map");
+        A3main.printBoard(board);
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else if (game.isGameOver()) {
+            System.out.println("Result: Agent not terminated");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Random Probing Strategy
+     */
+    public void RP() {
+        Random rand = new Random();
+        Cell cell = unprovedCells.get(rand.nextInt(unprovedCells.size()));
+        proveCell(cell);
+    }
+
+    /**
+     * Method for Random Probing Strategy with single point strategy
+     */
+    public void RPSPS() {
+        Cell targetCell = null;
+        String situation = "RP";
+        // Check AFN or AMN
+        for (Cell cell : unprovedCells) {
+            if (isAFN(cell)) {
+                situation = "AFN";
+                targetCell = cell;
+                break;
+            } else if (isAMN(cell)) {
+                situation = "AMN";
+                targetCell = cell;
+                break;
+            }
+        }
+        if (situation.equals("RP")) {
+            counter++;
+            RP();
+        } else if (situation.equals("AFN")) {
+            counter++;
+            proveCell(targetCell);
+        } else {
+            counter++;
+            setDanger(targetCell);
+        }
+    }
+
+    /**
+     * Method for SATS with RP and SPS with DNF encoding.
+     */
+    public void RPSATWithDNF() {
+
+        Cell targetCell = null;
+        String situation = "RP";
+        try {
+            // Build KB based on the uncoveredCells
+            String kbString = buildKB();
+            // Convert the KB into a logical formula
+            for (Cell cell : unprovedCells) {
+                String clause = "&T" + cell.x + cell.y;
+                Formula formula = p.parse(kbString + clause);
+                // Convert a logical formula to a CNF encoding
+                SATSolver miniSat = MiniSat.miniSat(f);
+                miniSat.add(formula);
+                Tristate result = miniSat.sat();
+                if (result.toString().equals("FALSE")) {
+                    targetCell = cell;
+                    situation = "S";
+                    break;
+                }
+            }
+            if (situation.equals("S")) {
+                counter++;
+                proveCell(targetCell);
+            } else if (situation.equals("RP")) {
+                game.setSatisfiable(false);
+                RPSPS();
+            }
+        } catch (ParserException e) {
+            System.out.println("ParserException: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Method for SATS with RP and SPS with CNF encoding.
+     */
+    public void RPSATWithCNF() {
+
+        ISolver solver;
+        String situation = "RP";
+        Cell targetCell = null;
+        try {
+            // Build KB based on the uncoveredCells
+            String kbString = buildKB();
+            DIMACS dimacs = new DIMACS();
+            // Convert the KB into a logical formula
+            Formula formula = p.parse(kbString);
+            // Convert a logical formula to a CNF encoding
+            int[][] dimacsClauses = dimacs.buildDIMACS(formula);
+            solver = SolverFactory.newDefault();
+            solver.newVar(1000);
+            solver.setExpectedNumberOfClauses(50000);
+            for (int j = 0; j < dimacsClauses.length; j++) {
+                VecInt vecInt = new VecInt(dimacsClauses[j]);
+                solver.addClause(vecInt);
+            }
+            // Check the satisfiability of including a tornado
+            for (Cell cell : unprovedCells) {
+                String clause = "T" + cell.x + cell.y;
+                if (dimacs.getLiterals().containsKey(clause)) {
+                    int literal = dimacs.getLiterals().get(clause);
+                    int[] literals = new int[]{literal};
+                    if (!solver.isSatisfiable(new VecInt(literals))) {
+                        targetCell = cell;
+                        situation = "S";
+                        break;
+                    }
+                }
+            }
+            if (situation.equals("S")) {
+                counter++;
+                proveCell(targetCell);
+            } else if (situation.equals("RP")) {
+                game.setSatisfiable(false);
+                RPSPS();
+            }
+        } catch (ParserException e) {
+            System.out.println("ParserException: " + e.getMessage());
+        } catch (ContradictionException e) {
+            System.out.println("ContradictionException: " + e.getMessage());
+        } catch (TimeoutException e) {
+            System.out.println("TimeoutException: " + e.getMessage());
         }
     }
 }
