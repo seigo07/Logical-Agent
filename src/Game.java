@@ -49,10 +49,10 @@ public class Game {
         for (Cell cell: cells) {
             if (cell.x == x && cell.y == y) {
                 coveredCells.remove(cell);
-                if (cell.getHint() == 't' && type.equals("P1")) {
+                if (cell.getHint() == 't' && (type.equals("P1") || type.equals("P5"))) {
                     isGameOver = true;
                 } else if (checkGameWon()) {
-                    if (type.equals("P1")) {
+                    if (type.equals("P1") || type.equals("P5")) {
                         isGameOver = true;
                     }
                     isGameWon = true;

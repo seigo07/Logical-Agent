@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.logicng.datastructures.Tristate;
 import org.logicng.formulas.FormulaFactory;
@@ -599,7 +600,7 @@ public class Agent {
                 playIntermediateCNF();
                 break;
             case "P5":
-                //TODO: Part 5
+                playAdditional();
                 break;
         }
     }
@@ -691,5 +692,36 @@ public class Agent {
         } else {
             System.out.println("Result: Agent dead: found mine");
         }
+    }
+
+    /**
+     * Play Additional Tornado Sweeper Agent
+     */
+    public void playAdditional() {
+        while (!game.isGameOver()) {
+            uncoverNeighbours();
+            if (!game.isGameWon()) {
+//                if (this.verbose) {
+//                    A3main.printBoard(board);
+//                }
+                RP();
+            }
+        }
+        System.out.println("Final map");
+        A3main.printBoard(board);
+        if (game.isGameWon()) {
+            System.out.println("Result: Agent alive: all solved");
+        } else {
+            System.out.println("Result: Agent dead: found mine");
+        }
+    }
+
+    /**
+     * Random Probing Strategy
+     */
+    public void RP() {
+        Random rand = new Random();
+        Cell cell = unprovedCells.get(rand.nextInt(unprovedCells.size()));
+        proveCell(cell);
     }
 }
