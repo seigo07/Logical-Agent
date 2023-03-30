@@ -4,7 +4,7 @@ Tornado Sweeper Game.
 
 ## Description
 
-Tornado Sweeper game based on logic- based strategies on a hexagonal shape board.
+Tornado Sweeper game based on logic-based strategies on a hexagonal shape board.
 
 <img width="426" alt="Screenshot 2023-03-30 at 21 39 34" src="https://user-images.githubusercontent.com/118636537/228958928-5964ec94-e4c7-4801-b663-df7916bb28c5.png">
 
